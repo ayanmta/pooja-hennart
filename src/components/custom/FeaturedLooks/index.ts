@@ -1,0 +1,2 @@
+export { FeaturedLooks } from "./FeaturedLooks";
+

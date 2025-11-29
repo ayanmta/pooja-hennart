@@ -1,0 +1,2 @@
+export { AnimatedPortfolioSection } from "./AnimatedPortfolioSection";
+

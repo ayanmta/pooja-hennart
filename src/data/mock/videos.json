@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1",
+    "type": "video",
+    "src": "https://www.youtube.com/watch?v=example1",
+    "thumbnail": "/images/video-thumb-1.jpg",
+    "platform": "youtube",
+    "categories": ["tutorial"],
+    "caption": "Bridal Makeup Tutorial - Step by Step"
+  },
+  {
+    "id": "2",
+    "type": "video",
+    "src": "https://www.instagram.com/reel/example1",
+    "thumbnail": "/images/reel-thumb-1.jpg",
+    "platform": "instagram",
+    "categories": ["bridal"],
+    "caption": "Quick bridal makeup transformation"
+  },
+  {
+    "id": "3",
+    "type": "video",
+    "src": "https://www.youtube.com/watch?v=example2",
+    "thumbnail": "/images/video-thumb-2.jpg",
+    "platform": "youtube",
+    "categories": ["editorial"],
+    "caption": "Editorial Makeup Transformation"
+  },
+  {
+    "id": "4",
+    "type": "video",
+    "src": "https://www.instagram.com/reel/example2",
+    "thumbnail": "/images/reel-thumb-2.jpg",
+    "platform": "instagram",
+    "categories": ["mehendi"],
+    "caption": "Mehendi application process"
+  }
+]

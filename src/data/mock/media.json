@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "type": "image",
+    "src": "/images/bridal-1.jpg",
+    "thumbnail": "/images/bridal-1-thumb.jpg",
+    "platform": "instagram",
+    "categories": ["bridal"],
+    "caption": "Elegant bridal makeup for a summer wedding"
+  },
+  {
+    "id": "2",
+    "type": "image",
+    "src": "/images/editorial-1.jpg",
+    "thumbnail": "/images/editorial-1-thumb.jpg",
+    "platform": "instagram",
+    "categories": ["editorial"],
+    "caption": "Bold editorial look for fashion magazine"
+  },
+  {
+    "id": "3",
+    "type": "image",
+    "src": "/images/mehendi-1.jpg",
+    "thumbnail": "/images/mehendi-1-thumb.jpg",
+    "platform": "instagram",
+    "categories": ["mehendi"],
+    "caption": "Intricate bridal mehendi design"
+  },
+  {
+    "id": "4",
+    "type": "image",
+    "src": "/images/party-1.jpg",
+    "thumbnail": "/images/party-1-thumb.jpg",
+    "platform": "instagram",
+    "categories": ["party"],
+    "caption": "Glamorous party makeup look"
+  },
+  {
+    "id": "5",
+    "type": "image",
+    "src": "/images/bridal-2.jpg",
+    "thumbnail": "/images/bridal-2-thumb.jpg",
+    "platform": "instagram",
+    "categories": ["bridal"],
+    "caption": "Traditional bridal makeup with modern touch"
+  },
+  {
+    "id": "6",
+    "type": "image",
+    "src": "/images/before-after-1.jpg",
+    "thumbnail": "/images/before-after-1-thumb.jpg",
+    "platform": "instagram",
+    "categories": ["before-after"],
+    "caption": "Transformation showcase"
+  }
+]

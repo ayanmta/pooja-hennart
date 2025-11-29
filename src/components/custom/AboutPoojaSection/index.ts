@@ -1,0 +1,2 @@
+export { AboutPoojaSection } from "./AboutPoojaSection";
+

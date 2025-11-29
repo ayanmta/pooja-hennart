@@ -1,0 +1,311 @@
+/* StaggeredMenu Styles - Adapted for Tailwind + Theme Tokens */
+
+.staggered-menu-wrapper {
+  --sm-accent: hsl(var(--primary));
+  position: relative;
+  z-index: 50;
+}
+
+.staggered-menu-wrapper.fixed-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.staggered-menu-wrapper.fixed-wrapper > * {
+  pointer-events: auto;
+}
+
+/* Pre-layers for slide-in effect */
+.sm-prelayers {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.sm-prelayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+
+/* Header */
+.staggered-menu-header {
+  position: relative;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  pointer-events: auto;
+}
+
+.sm-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+}
+
+.sm-logo:hover {
+  opacity: 0.8;
+}
+
+.sm-logo-img {
+  height: auto;
+  max-width: 110px;
+  object-fit: contain;
+}
+
+.sm-logo-text {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: hsl(var(--foreground));
+}
+
+/* Toggle Button */
+.sm-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: opacity 0.2s;
+  pointer-events: auto;
+}
+
+.sm-toggle:hover {
+  opacity: 0.8;
+}
+
+.sm-toggle:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.sm-toggle-textWrap {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  height: 1.25rem;
+  width: 3.5rem;
+}
+
+.sm-toggle-textInner {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.sm-toggle-line {
+  display: block;
+  line-height: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Icon (Plus/X) */
+.sm-icon {
+  position: relative;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+}
+
+.sm-icon-line {
+  position: absolute;
+  width: 1.125rem;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  will-change: transform;
+}
+
+.sm-icon-line-v {
+  transform: rotate(90deg);
+}
+
+/* Panel */
+.staggered-menu-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 28rem;
+  height: 100vh;
+  background: hsl(var(--background));
+  z-index: 9999;
+  will-change: transform;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.staggered-menu-wrapper[data-position="left"] .staggered-menu-panel {
+  left: 0;
+  right: auto;
+}
+
+.staggered-menu-wrapper[data-position="right"] .staggered-menu-panel {
+  right: 0;
+  left: auto;
+}
+
+.sm-panel-inner {
+  padding: 6rem 2rem 2rem;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Menu List */
+.sm-panel-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sm-panel-itemWrap {
+  position: relative;
+}
+
+.sm-panel-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  text-decoration: none;
+  color: hsl(var(--foreground));
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: color 0.2s;
+  position: relative;
+}
+
+.sm-panel-item:hover {
+  color: hsl(var(--primary));
+}
+
+.sm-panel-item:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 4px;
+  border-radius: 0.25rem;
+}
+
+.sm-panel-item[data-index]::before {
+  content: attr(data-index);
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+  opacity: var(--sm-num-opacity, 0);
+  transition: opacity 0.3s;
+  min-width: 1.5rem;
+}
+
+.sm-panel-itemLabel {
+  display: block;
+  will-change: transform;
+}
+
+.sm-panel-item-button {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+/* Socials */
+.sm-socials {
+  margin-top: auto;
+  padding-top: 2rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.sm-socials-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 1rem;
+}
+
+.sm-socials-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sm-socials-item {
+  position: relative;
+}
+
+.sm-socials-link {
+  display: block;
+  padding: 0.5rem 0;
+  text-decoration: none;
+  color: hsl(var(--foreground));
+  font-size: 1rem;
+  transition: color 0.2s;
+  will-change: transform, opacity;
+}
+
+.sm-socials-link:hover {
+  color: hsl(var(--primary));
+}
+
+.sm-socials-link:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .staggered-menu-panel {
+    max-width: 100%;
+  }
+
+  .sm-panel-item {
+    font-size: 1.5rem;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .sm-toggle-textInner,
+  .sm-icon,
+  .sm-icon-line,
+  .sm-panel-itemLabel,
+  .sm-socials-link {
+    will-change: auto;
+  }
+}
+
