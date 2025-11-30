@@ -175,49 +175,53 @@ export function TestimonialsCarousel({
           <div className="relative">
             <TiltedCard className="h-full">
               <Card 
-                className="relative overflow-hidden border-2 bg-gradient-to-br from-card via-card to-muted/20 p-8 shadow-2xl transition-shadow duration-300 hover:shadow-3xl md:p-12 touch-pan-x select-none"
-                onTouchStart={(e) => {
-                  const touch = e.touches[0];
-                  startPosRef.current = { x: touch.clientX, y: touch.clientY };
-                }}
-                onTouchMove={(e) => {
-                  if (!startPosRef.current) return;
-                  const touch = e.touches[0];
-                  const dx = touch.clientX - startPosRef.current.x;
-                  const dy = touch.clientY - startPosRef.current.y;
-                  // Only track horizontal movement (prevent vertical scroll interference)
-                  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
-                    setIsDragging(true);
-                    // Prevent vertical scroll when swiping horizontally
-                    if (Math.abs(dx) > 20) {
-                      e.preventDefault();
-                    }
-                  }
-                }}
-                onTouchEnd={(e) => {
-                  if (!startPosRef.current) return;
-                  const touch = e.changedTouches[0];
-                  const dx = touch.clientX - startPosRef.current.x;
-                  const threshold = 50;
-                  
-                  if (Math.abs(dx) > threshold) {
-                    if (dx > 0) {
-                      prev();
-                    } else {
-                      next();
-                    }
-                  }
-                  setIsDragging(false);
-                  startPosRef.current = null;
-                }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={() => {
-                  setIsDragging(false);
-                  startPosRef.current = null;
-                }}
+                className="group relative overflow-hidden border-2 bg-gradient-to-br from-card via-card to-muted/20 p-8 shadow-2xl transition-shadow duration-300 hover:shadow-3xl md:p-12 touch-pan-x select-none"
               >
+                {/* Swipe detection overlay - doesn't move the card */}
+                <div
+                  className="absolute inset-0 z-30 touch-none md:pointer-events-none"
+                  onTouchStart={(e) => {
+                    const touch = e.touches[0];
+                    startPosRef.current = { x: touch.clientX, y: touch.clientY };
+                  }}
+                  onTouchMove={(e) => {
+                    if (!startPosRef.current) return;
+                    const touch = e.touches[0];
+                    const dx = touch.clientX - startPosRef.current.x;
+                    const dy = touch.clientY - startPosRef.current.y;
+                    // Only track horizontal movement (prevent vertical scroll interference)
+                    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+                      setIsDragging(true);
+                      // Prevent vertical scroll when swiping horizontally
+                      if (Math.abs(dx) > 20) {
+                        e.preventDefault();
+                      }
+                    }
+                  }}
+                  onTouchEnd={(e) => {
+                    if (!startPosRef.current) return;
+                    const touch = e.changedTouches[0];
+                    const dx = touch.clientX - startPosRef.current.x;
+                    const threshold = 50;
+                    
+                    if (Math.abs(dx) > threshold) {
+                      if (dx > 0) {
+                        prev();
+                      } else {
+                        next();
+                      }
+                    }
+                    setIsDragging(false);
+                    startPosRef.current = null;
+                  }}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={() => {
+                    setIsDragging(false);
+                    startPosRef.current = null;
+                  }}
+                />
                   {/* Decorative Quote Icon */}
                   <div className="absolute right-8 top-8 opacity-5">
                     <Quote className="h-24 w-24 text-foreground" />
@@ -317,39 +321,29 @@ export function TestimonialsCarousel({
                     </motion.div>
                   </AnimatePresence>
 
-                  {/* Navigation Buttons */}
+                  {/* Navigation Buttons - Hidden on mobile, minimal on desktop */}
                   {testimonials.length > 1 && (
                     <>
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex h-8 w-8 rounded-full bg-background/60 backdrop-blur-sm border border-border/50 hover:bg-background/80 hover:border-border transition-all opacity-0 hover:opacity-100 group-hover:opacity-100"
+                        onClick={prev}
+                        disabled={isDragging}
+                        aria-label="Previous testimonial"
                       >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 rounded-full bg-background/90 backdrop-blur-md shadow-lg transition-all hover:bg-background hover:shadow-xl md:left-4"
-                          onClick={prev}
-                          disabled={isDragging}
-                          aria-label="Previous testimonial"
-                        >
-                          <ChevronLeft className="h-5 w-5" />
-                        </Button>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex h-8 w-8 rounded-full bg-background/60 backdrop-blur-sm border border-border/50 hover:bg-background/80 hover:border-border transition-all opacity-0 hover:opacity-100 group-hover:opacity-100"
+                        onClick={next}
+                        disabled={isDragging}
+                        aria-label="Next testimonial"
                       >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 rounded-full bg-background/90 backdrop-blur-md shadow-lg transition-all hover:bg-background hover:shadow-xl md:right-4"
-                          onClick={next}
-                          disabled={isDragging}
-                          aria-label="Next testimonial"
-                        >
-                          <ChevronRight className="h-5 w-5" />
-                        </Button>
-                      </motion.div>
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
                     </>
                   )}
 
@@ -381,20 +375,20 @@ export function TestimonialsCarousel({
                     </motion.div>
                   )}
 
-                  {/* Swipe Hint */}
+                  {/* Swipe Hint - Only on mobile */}
                   {testimonials.length > 1 && !isDragging && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10"
+                      className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 md:hidden"
                     >
                       <Badge variant="outline" className="text-xs font-normal bg-background/80 backdrop-blur-sm">
                         Swipe to navigate
                       </Badge>
                     </motion.div>
                   )}
-                </Card>
+              </Card>
             </TiltedCard>
           </div>
         </motion.div>
