@@ -59,30 +59,44 @@ export function HeroSection({
     return () => clearInterval(interval);
   }, [carouselAutoPlay, carouselInterval, images.length]);
 
+  // Award-winning fluid transitions with crossfade and subtle parallax
   const slideVariants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? "100%" : "-100%",
+      x: 0,
       opacity: 0,
-      scale: 1.1,
+      scale: 1.05,
+      filter: "blur(8px) brightness(0.8)",
     }),
     center: {
       zIndex: 1,
       x: 0,
       opacity: 1,
       scale: 1,
+      filter: "blur(0px) brightness(1)",
     },
     exit: (direction: number) => ({
       zIndex: 0,
-      x: direction < 0 ? "100%" : "-100%",
+      x: 0,
       opacity: 0,
-      scale: 0.9,
+      scale: 0.95,
+      filter: "blur(8px) brightness(0.8)",
     }),
   };
 
+  // Premium easing curves for fluid motion (award-winning website quality)
   const imageTransition = {
-    x: { type: "spring" as const, stiffness: 300, damping: 30 },
-    opacity: { duration: 1.5 },
-    scale: { duration: 1.5 },
+    opacity: { 
+      duration: 1.2, 
+      ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] // Custom cubic-bezier for smooth fade
+    },
+    scale: { 
+      duration: 1.4, 
+      ease: [0.33, 1, 0.68, 1] as [number, number, number, number] // Smooth scale transition
+    },
+    filter: {
+      duration: 1.2,
+      ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number]
+    },
   };
 
   return (
@@ -90,31 +104,39 @@ export function HeroSection({
       role="banner"
       className="relative flex min-h-screen flex-col overflow-hidden bg-black"
     >
-      {/* Image Section - Top Portion (60vh) */}
+      {/* Image Section - Top Portion (60vh) with fluid transitions */}
       {images.length > 0 && (
-        <div className="relative h-[60vh] min-h-[400px] w-full flex-shrink-0">
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={currentImageIndex}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={imageTransition}
-              className="absolute inset-0"
-            >
-              <Image
-                src={images[currentImageIndex].url}
-                alt={images[currentImageIndex].alt || ""}
-                fill
-                priority={currentImageIndex === 0}
-                className="object-cover"
-                sizes="100vw"
-              />
-              {/* Gradient overlay for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/40" />
-            </motion.div>
+        <div className="relative h-[60vh] min-h-[400px] w-full flex-shrink-0 overflow-hidden">
+          <AnimatePresence mode="sync" initial={false}>
+            {images.map((image, index) => {
+              const isActive = index === currentImageIndex;
+              return (
+                <motion.div
+                  key={`${image.url}-${index}`}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate={isActive ? "center" : "exit"}
+                  exit="exit"
+                  transition={imageTransition}
+                  className="absolute inset-0"
+                  style={{
+                    willChange: isActive ? 'opacity, transform, filter' : 'auto',
+                  }}
+                >
+                  <Image
+                    src={image.url}
+                    alt={image.alt || ""}
+                    fill
+                    priority={index === 0}
+                    className="object-cover"
+                    sizes="100vw"
+                  />
+                  {/* Gradient overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/40" />
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
       )}

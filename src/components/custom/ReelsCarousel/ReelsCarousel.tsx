@@ -276,52 +276,49 @@ export function ReelsCarousel({
         <div className="relative h-full w-full">
           {/* YouTube Video Player */}
           {isYouTube && youtubeEmbedUrl && (
-            <iframe
-              key={`${reel.id}-${isActive ? 'active' : 'inactive'}`}
-              ref={(el) => {
-                if (el) videoRefs.current.set(reel.id, el);
-              }}
-              src={isActive ? youtubeEmbedUrl : youtubeEmbedUrl.replace('autoplay=1', 'autoplay=0')}
-              title={reel.caption || "YouTube video"}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              className="h-full w-full"
-              style={{ 
-                aspectRatio: isShort ? '9/16' : '16/9'
-              }}
-              loading="lazy"
-              onLoad={() => {
-                // Listen for user mute/unmute actions to track manual muting
-                if (isActive && reel.platform === 'youtube') {
-                  // Set up message listener to detect user muting
-                  const messageHandler = (event: MessageEvent) => {
-                    if (event.origin !== 'https://www.youtube.com') return;
-                    
-                    try {
-                      const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-                      if (data.event === 'onStateChange') {
-                        // State 2 = paused, but we can't directly detect mute state
-                        // We'll track if user manually interacts with controls
-                      }
-                    } catch {
-                      // Ignore parse errors
-                    }
-                  };
-                  
-                  window.addEventListener('message', messageHandler);
-                  
-                  // Cleanup listener after 5 seconds
-                  setTimeout(() => {
-                    window.removeEventListener('message', messageHandler);
-                  }, 5000);
-                }
-              }}
-            />
+            <div className="relative h-full w-full">
+              <iframe
+                key={`${reel.id}-${isActive ? 'active' : 'inactive'}`}
+                ref={(el) => {
+                  if (el) videoRefs.current.set(reel.id, el);
+                }}
+                src={isActive ? youtubeEmbedUrl : youtubeEmbedUrl.replace('autoplay=1', 'autoplay=0')}
+                title={reel.caption || "YouTube video"}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="h-full w-full"
+                style={{ 
+                  aspectRatio: isShort ? '9/16' : '16/9'
+                }}
+                loading="lazy"
+              />
+              {/* Audio Control Indicator - Visible overlay */}
+              {isActive && (
+                <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2 rounded-full bg-black/70 backdrop-blur-md px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="h-4 w-4 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M6.343 6.343l-.707-.707m0 0L9 3.515m-3.364 2.828L9 10.172m-3.364-3.364l3.364 3.364m0 0l3.364 3.364m-3.364-3.364L9 10.172"
+                      />
+                    </svg>
+                    <span className="text-xs font-medium text-white">Tap to unmute</span>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Instagram Embed */}
           {isInstagram && instagramEmbedUrl ? (
-            <>
+            <div className="relative h-full w-full">
               <iframe
                 key={`${reel.id}-${isActive ? 'active' : 'inactive'}`}
                 ref={(el) => {
@@ -331,28 +328,19 @@ export function ReelsCarousel({
                 title={reel.caption || "Instagram reel"}
                 className="h-full w-full"
                 scrolling="no"
-                allow="encrypted-media"
+                allow="encrypted-media; autoplay"
                 allowFullScreen
               />
-              {/* Note: Instagram doesn't support autoplay - show play overlay */}
+              {/* Audio Control Indicator for Instagram */}
               {isActive && (
-                <div 
-                  className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer z-10 transition-opacity hover:bg-black/30"
-                  onClick={() => {
-                    // Try to trigger play by clicking the iframe
-                    const iframe = videoRefs.current.get(reel.id);
-                    if (iframe) {
-                      iframe.focus();
-                      // Instagram embeds require user interaction to play
-                    }
-                  }}
-                >
-                  <div className="rounded-full bg-white/20 backdrop-blur-md p-4">
-                    <Instagram className="h-8 w-8 text-white" />
+                <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2 rounded-full bg-black/70 backdrop-blur-md px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <Instagram className="h-4 w-4 text-white" />
+                    <span className="text-xs font-medium text-white">Tap to play</span>
                   </div>
                 </div>
               )}
-            </>
+            </div>
           ) : isInstagram ? (
             // Fallback: Show thumbnail with link for Instagram
             <>
