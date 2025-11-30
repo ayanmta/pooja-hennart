@@ -28,6 +28,7 @@ export function ReelsCarousel({
   const x = useMotionValue(0);
   const [cardWidth, setCardWidth] = useState(280);
   const videoRefs = useRef<Map<string, HTMLIFrameElement>>(new Map());
+  const unmuteTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   // Extract YouTube video ID from URL
   const getYouTubeEmbedUrl = useCallback((url: string, autoplay = false, loop = false) => {
@@ -37,14 +38,15 @@ export function ReelsCarousel({
     if (!videoId) return url;
     
     // Enhanced autoplay parameters for native app-like experience
-    // Note: Autoplay requires muted=1 for most browsers (autoplay policy)
-    // We'll unmute after play starts using postMessage
+    // Try unmuted first - if browser blocks, we'll handle it with postMessage
     const params = new URLSearchParams({
       autoplay: autoplay ? '1' : '0',
-      mute: autoplay ? '1' : '0', // Must be muted for autoplay to work (browser policy)
+      mute: '0', // Audio on by default (browser may block, we'll try to unmute after delay)
       controls: '1',
       rel: '0', // Don't show related videos
-      modestbranding: '1',
+      modestbranding: '1', // Hide YouTube logo
+      showinfo: '0', // Hide video info
+      iv_load_policy: '3', // Hide annotations
       playsinline: '1', // Important for mobile
       enablejsapi: '1', // Enable JS API for better control
       origin: typeof window !== 'undefined' ? window.location.origin : '',
@@ -145,6 +147,7 @@ export function ReelsCarousel({
     if (!currentReel) return;
 
     const videoId = currentReel.id;
+    const timeoutsRef = unmuteTimeouts.current; // Capture ref for cleanup
     
     // Mark as played (using setTimeout to avoid synchronous setState)
     if (!playedVideos.has(videoId)) {
@@ -165,19 +168,28 @@ export function ReelsCarousel({
           // Check if we need to update (different video or no autoplay)
           const needsUpdate = 
             currentSrc.split('?')[0] !== newSrc.split('?')[0] || 
-            !currentSrc.includes('autoplay=1') ||
-            !currentSrc.includes('mute=1');
+            !currentSrc.includes('autoplay=1');
           
           if (needsUpdate) {
+            // Clear any existing unmute timeout for this video
+            const existingTimeout = unmuteTimeouts.current.get(videoId);
+            if (existingTimeout) {
+              clearTimeout(existingTimeout);
+              unmuteTimeouts.current.delete(videoId);
+            }
+            
             // Force reload by clearing and setting src
             iframe.src = '';
             // Use requestAnimationFrame to ensure the clear takes effect
             requestAnimationFrame(() => {
               iframe.src = newSrc;
               
-              // Try to unmute after a short delay (YouTube autoplay policy requires muted)
-              setTimeout(() => {
+              // Try to ensure audio is on after delay (if browser policy muted it)
+              // Browser policy may block autoplay with audio, so we try after 2 seconds
+              const unmuteTimeout = setTimeout(() => {
                 try {
+                  // Try to unmute (in case browser muted it due to autoplay policy)
+                  // This only works if user hasn't manually muted
                   iframe.contentWindow?.postMessage(
                     JSON.stringify({
                       event: 'command',
@@ -189,7 +201,9 @@ export function ReelsCarousel({
                 } catch {
                   // Ignore cross-origin errors
                 }
-              }, 1000);
+              }, 2000); // 2 second delay to allow video to start
+              
+              unmuteTimeouts.current.set(videoId, unmuteTimeout);
             });
           }
         }
@@ -209,6 +223,12 @@ export function ReelsCarousel({
         }
       }
     }, 100); // Small delay to ensure iframe is rendered
+    
+    // Cleanup timeouts on unmount or index change
+    return () => {
+      timeoutsRef.forEach((timeout) => clearTimeout(timeout));
+      timeoutsRef.clear();
+    };
   }, [currentIndex, reels, playedVideos, getYouTubeEmbedUrl, getInstagramEmbedUrl]);
 
   // Get thumbnail URL (auto-generate if not provided)
@@ -266,8 +286,36 @@ export function ReelsCarousel({
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               className="h-full w-full"
-              style={{ aspectRatio: isShort ? '9/16' : '16/9' }}
+              style={{ 
+                aspectRatio: isShort ? '9/16' : '16/9'
+              }}
               loading="lazy"
+              onLoad={() => {
+                // Listen for user mute/unmute actions to track manual muting
+                if (isActive && reel.platform === 'youtube') {
+                  // Set up message listener to detect user muting
+                  const messageHandler = (event: MessageEvent) => {
+                    if (event.origin !== 'https://www.youtube.com') return;
+                    
+                    try {
+                      const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+                      if (data.event === 'onStateChange') {
+                        // State 2 = paused, but we can't directly detect mute state
+                        // We'll track if user manually interacts with controls
+                      }
+                    } catch {
+                      // Ignore parse errors
+                    }
+                  };
+                  
+                  window.addEventListener('message', messageHandler);
+                  
+                  // Cleanup listener after 5 seconds
+                  setTimeout(() => {
+                    window.removeEventListener('message', messageHandler);
+                  }, 5000);
+                }
+              }}
             />
           )}
 

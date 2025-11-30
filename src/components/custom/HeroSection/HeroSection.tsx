@@ -209,10 +209,10 @@ export function HeroSection({
         </div>
       </motion.div>
 
-      {/* Image Indicators (if carousel) - Positioned above black section */}
+      {/* Image Indicators (if carousel) - Positioned above black section - Hidden on mobile */}
       {images.length > 1 && (
         <motion.div
-          className="absolute bottom-[40vh] left-1/2 z-30 -translate-x-1/2 md:bottom-[45vh]"
+          className="absolute bottom-[40vh] left-1/2 z-30 -translate-x-1/2 md:bottom-[45vh] hidden md:flex"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
