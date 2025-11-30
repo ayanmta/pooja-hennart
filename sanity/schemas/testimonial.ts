@@ -107,11 +107,13 @@ export default defineType({
       platform: "platform",
       media: "authorProfilePic",
     },
-    prepare({ title, subtitle, platform }) {
+    prepare({ title, subtitle, platform, media }) {
       return {
         title: title || "Anonymous",
         subtitle: subtitle ? `${subtitle.substring(0, 60)}...` : "No quote",
-        media: platform === "youtube" ? "📺" : platform === "instagram" ? "📷" : "💬",
+        // Use the actual image media, or omit it if not available
+        // Don't use emojis as media - they cause invalid HTML tag errors
+        media: media || undefined,
       };
     },
   },
