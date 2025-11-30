@@ -38,10 +38,11 @@ export function ReelsCarousel({
     if (!videoId) return url;
     
     // Enhanced autoplay parameters for native app-like experience
-    // Try unmuted first - if browser blocks, we'll handle it with postMessage
+    // Note: Autoplay requires muted=1 for most browsers (autoplay policy)
+    // We'll unmute after play starts using postMessage
     const params = new URLSearchParams({
       autoplay: autoplay ? '1' : '0',
-      mute: '0', // Audio on by default (browser may block, we'll try to unmute after delay)
+      mute: autoplay ? '1' : '0', // Must be muted for autoplay to work (browser policy)
       controls: '1',
       rel: '0', // Don't show related videos
       modestbranding: '1', // Hide YouTube logo
@@ -168,7 +169,8 @@ export function ReelsCarousel({
           // Check if we need to update (different video or no autoplay)
           const needsUpdate = 
             currentSrc.split('?')[0] !== newSrc.split('?')[0] || 
-            !currentSrc.includes('autoplay=1');
+            !currentSrc.includes('autoplay=1') ||
+            !currentSrc.includes('mute=1');
           
           if (needsUpdate) {
             // Clear any existing unmute timeout for this video
@@ -184,12 +186,10 @@ export function ReelsCarousel({
             requestAnimationFrame(() => {
               iframe.src = newSrc;
               
-              // Try to ensure audio is on after delay (if browser policy muted it)
-              // Browser policy may block autoplay with audio, so we try after 2 seconds
+              // Try to unmute after a short delay (YouTube autoplay policy requires muted)
+              // Only if user hasn't manually muted
               const unmuteTimeout = setTimeout(() => {
                 try {
-                  // Try to unmute (in case browser muted it due to autoplay policy)
-                  // This only works if user hasn't manually muted
                   iframe.contentWindow?.postMessage(
                     JSON.stringify({
                       event: 'command',
