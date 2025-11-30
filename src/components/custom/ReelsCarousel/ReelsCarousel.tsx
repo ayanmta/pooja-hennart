@@ -37,9 +37,11 @@ export function ReelsCarousel({
     if (!videoId) return url;
     
     // Enhanced autoplay parameters for native app-like experience
+    // Note: Autoplay requires muted=1 for most browsers (autoplay policy)
+    // We'll unmute after play starts using postMessage
     const params = new URLSearchParams({
       autoplay: autoplay ? '1' : '0',
-      mute: '0', // Start unmuted for better UX
+      mute: autoplay ? '1' : '0', // Must be muted for autoplay to work (browser policy)
       controls: '1',
       rel: '0', // Don't show related videos
       modestbranding: '1',
@@ -151,27 +153,62 @@ export function ReelsCarousel({
       }, 0);
     }
 
-    // Autoplay when video comes into focus
-    if (currentReel.platform === "youtube") {
-      const iframe = videoRefs.current.get(videoId);
-      if (iframe) {
-        // Reload with autoplay for native app-like experience
-        const newSrc = getYouTubeEmbedUrl(currentReel.src, true, false);
-        // Only update if URL changed to avoid unnecessary reloads
-        if (iframe.src.split('?')[0] !== newSrc.split('?')[0] || !iframe.src.includes('autoplay=1')) {
-          iframe.src = newSrc;
+    // Autoplay when video comes into focus - use setTimeout to ensure iframe is in DOM
+    setTimeout(() => {
+      if (currentReel.platform === "youtube") {
+        const iframe = videoRefs.current.get(videoId);
+        if (iframe && iframe.contentWindow) {
+          // Force reload iframe for autoplay to work
+          const newSrc = getYouTubeEmbedUrl(currentReel.src, true, false);
+          const currentSrc = iframe.src;
+          
+          // Check if we need to update (different video or no autoplay)
+          const needsUpdate = 
+            currentSrc.split('?')[0] !== newSrc.split('?')[0] || 
+            !currentSrc.includes('autoplay=1') ||
+            !currentSrc.includes('mute=1');
+          
+          if (needsUpdate) {
+            // Force reload by clearing and setting src
+            iframe.src = '';
+            // Use requestAnimationFrame to ensure the clear takes effect
+            requestAnimationFrame(() => {
+              iframe.src = newSrc;
+              
+              // Try to unmute after a short delay (YouTube autoplay policy requires muted)
+              setTimeout(() => {
+                try {
+                  iframe.contentWindow?.postMessage(
+                    JSON.stringify({
+                      event: 'command',
+                      func: 'unMute',
+                      args: []
+                    }),
+                    'https://www.youtube.com'
+                  );
+                } catch {
+                  // Ignore cross-origin errors
+                }
+              }, 1000);
+            });
+          }
+        }
+      } else if (currentReel.platform === "instagram") {
+        // Instagram embeds don't support autoplay due to platform restrictions
+        // We can try to reload, but it likely won't autoplay
+        const iframe = videoRefs.current.get(videoId);
+        if (iframe) {
+          const newSrc = getInstagramEmbedUrl(currentReel.src, true);
+          if (newSrc && iframe.src !== newSrc) {
+            // Force reload
+            iframe.src = '';
+            requestAnimationFrame(() => {
+              iframe.src = newSrc;
+            });
+          }
         }
       }
-    } else if (currentReel.platform === "instagram") {
-      // Instagram embeds don't support autoplay, but we can try to reload
-      const iframe = videoRefs.current.get(videoId);
-      if (iframe) {
-        const newSrc = getInstagramEmbedUrl(currentReel.src, true);
-        if (newSrc && iframe.src !== newSrc) {
-          iframe.src = newSrc;
-        }
-      }
-    }
+    }, 100); // Small delay to ensure iframe is rendered
   }, [currentIndex, reels, playedVideos, getYouTubeEmbedUrl, getInstagramEmbedUrl]);
 
   // Get thumbnail URL (auto-generate if not provided)
@@ -220,31 +257,54 @@ export function ReelsCarousel({
           {/* YouTube Video Player */}
           {isYouTube && youtubeEmbedUrl && (
             <iframe
+              key={`${reel.id}-${isActive ? 'active' : 'inactive'}`}
               ref={(el) => {
                 if (el) videoRefs.current.set(reel.id, el);
               }}
-              src={youtubeEmbedUrl}
+              src={isActive ? youtubeEmbedUrl : youtubeEmbedUrl.replace('autoplay=1', 'autoplay=0')}
               title={reel.caption || "YouTube video"}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               className="h-full w-full"
               style={{ aspectRatio: isShort ? '9/16' : '16/9' }}
+              loading="lazy"
             />
           )}
 
           {/* Instagram Embed */}
           {isInstagram && instagramEmbedUrl ? (
-            <iframe
-              ref={(el) => {
-                if (el) videoRefs.current.set(reel.id, el);
-              }}
-              src={instagramEmbedUrl}
-              title={reel.caption || "Instagram reel"}
-              className="h-full w-full"
-              scrolling="no"
-              allow="encrypted-media; autoplay"
-              allowFullScreen
-            />
+            <>
+              <iframe
+                key={`${reel.id}-${isActive ? 'active' : 'inactive'}`}
+                ref={(el) => {
+                  if (el) videoRefs.current.set(reel.id, el);
+                }}
+                src={instagramEmbedUrl}
+                title={reel.caption || "Instagram reel"}
+                className="h-full w-full"
+                scrolling="no"
+                allow="encrypted-media"
+                allowFullScreen
+              />
+              {/* Note: Instagram doesn't support autoplay - show play overlay */}
+              {isActive && (
+                <div 
+                  className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer z-10 transition-opacity hover:bg-black/30"
+                  onClick={() => {
+                    // Try to trigger play by clicking the iframe
+                    const iframe = videoRefs.current.get(reel.id);
+                    if (iframe) {
+                      iframe.focus();
+                      // Instagram embeds require user interaction to play
+                    }
+                  }}
+                >
+                  <div className="rounded-full bg-white/20 backdrop-blur-md p-4">
+                    <Instagram className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+              )}
+            </>
           ) : isInstagram ? (
             // Fallback: Show thumbnail with link for Instagram
             <>
