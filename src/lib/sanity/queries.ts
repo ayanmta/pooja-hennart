@@ -142,15 +142,33 @@ export async function getVideoItems(platform?: "instagram" | "youtube") {
   const items = await client.fetch(query);
   
   // Transform to MediaItem type
-  return items.map((item: any): MediaItem => ({
-    id: item._id,
-    type: "video",
-    src: item.url || "",
-    thumbnail: item.thumbnailUrl || "",
-    platform: item.platform || "youtube",
-    categories: item.categories?.map((cat: any) => cat.id) || [],
-    caption: item.caption || item.title || "",
-  }));
+  return items.map((item: any): MediaItem => {
+    const platform = item.platform || "youtube";
+    const url = item.url || "";
+    
+    // Auto-generate thumbnail if not provided
+    let thumbnail = item.thumbnailUrl || "";
+    if (!thumbnail && url) {
+      if (platform === "youtube") {
+        // Extract YouTube video ID and generate thumbnail URL
+        const videoIdMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/|.*[&?]v=))([a-zA-Z0-9_-]{11})/);
+        if (videoIdMatch && videoIdMatch[1]) {
+          thumbnail = `https://img.youtube.com/vi/${videoIdMatch[1]}/maxresdefault.jpg`;
+        }
+      }
+      // Instagram thumbnails require oEmbed API, handled in component
+    }
+    
+    return {
+      id: item._id,
+      type: "video",
+      src: url,
+      thumbnail: thumbnail,
+      platform: platform as "youtube" | "instagram",
+      categories: item.categories?.map((cat: any) => cat.id) || [],
+      caption: item.caption || item.title || "",
+    };
+  });
 }
 
 // Categories Query

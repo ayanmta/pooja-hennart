@@ -309,6 +309,10 @@ export default function DomeGallery({
     [dragDampening, maxVerticalRotationDeg, stopInertia]
   );
 
+  // Track gesture direction to distinguish horizontal (rotate) from vertical (scroll)
+  const gestureDirectionRef = useRef<'horizontal' | 'vertical' | null>(null);
+  const gestureThreshold = 15; // Minimum pixels to determine direction
+
   useGesture(
     {
       onDragStart: ({ event }) => {
@@ -317,6 +321,7 @@ export default function DomeGallery({
         const evt = event as MouseEvent | TouchEvent;
         draggingRef.current = true;
         movedRef.current = false;
+        gestureDirectionRef.current = null; // Reset direction
         startRotRef.current = { ...rotationRef.current };
         const clientX = "touches" in evt ? evt.touches[0].clientX : evt.clientX;
         const clientY = "touches" in evt ? evt.touches[0].clientY : evt.clientY;
@@ -329,30 +334,55 @@ export default function DomeGallery({
         const clientY = "touches" in evt ? evt.touches[0].clientY : evt.clientY;
         const dxTotal = clientX - startPosRef.current.x;
         const dyTotal = clientY - startPosRef.current.y;
+        
+        // Determine gesture direction on first significant movement
+        if (!gestureDirectionRef.current && (Math.abs(dxTotal) > gestureThreshold || Math.abs(dyTotal) > gestureThreshold)) {
+          gestureDirectionRef.current = Math.abs(dxTotal) > Math.abs(dyTotal) ? 'horizontal' : 'vertical';
+        }
+        
+        // Only rotate if gesture is primarily horizontal
+        if (gestureDirectionRef.current === 'vertical') {
+          // Allow vertical scrolling - don't interfere
+          if (last) {
+            draggingRef.current = false;
+            gestureDirectionRef.current = null;
+          }
+          return;
+        }
+        
         if (!movedRef.current) {
           const dist2 = dxTotal * dxTotal + dyTotal * dyTotal;
           if (dist2 > 16) movedRef.current = true;
         }
-        const nextX = clamp(startRotRef.current.x - dyTotal / dragSensitivity, -maxVerticalRotationDeg, maxVerticalRotationDeg);
-        const nextY = wrapAngleSigned(startRotRef.current.y + dxTotal / dragSensitivity);
-        if (rotationRef.current.x !== nextX || rotationRef.current.y !== nextY) {
-          rotationRef.current = { x: nextX, y: nextY };
-          applyTransform(nextX, nextY);
+        
+        // Only apply rotation for horizontal gestures
+        if (gestureDirectionRef.current === 'horizontal' || Math.abs(dxTotal) > Math.abs(dyTotal)) {
+          const nextX = clamp(startRotRef.current.x - dyTotal / dragSensitivity, -maxVerticalRotationDeg, maxVerticalRotationDeg);
+          const nextY = wrapAngleSigned(startRotRef.current.y + dxTotal / dragSensitivity);
+          if (rotationRef.current.x !== nextX || rotationRef.current.y !== nextY) {
+            rotationRef.current = { x: nextX, y: nextY };
+            applyTransform(nextX, nextY);
+          }
         }
+        
         if (last) {
           draggingRef.current = false;
-          const [vMagX, vMagY] = velocity;
-          const [dirX, dirY] = direction;
-          let vx = vMagX * dirX;
-          let vy = vMagY * dirY;
-          if (Math.abs(vx) < 0.001 && Math.abs(vy) < 0.001 && Array.isArray(movement)) {
-            const [mx, my] = movement;
-            vx = clamp((mx / dragSensitivity) * 0.02, -1.2, 1.2);
-            vy = clamp((my / dragSensitivity) * 0.02, -1.2, 1.2);
+          // Only apply inertia for horizontal gestures
+          if (gestureDirectionRef.current === 'horizontal') {
+            const [vMagX, vMagY] = velocity;
+            const [dirX, dirY] = direction;
+            let vx = vMagX * dirX;
+            let vy = vMagY * dirY;
+            if (Math.abs(vx) < 0.001 && Math.abs(vy) < 0.001 && Array.isArray(movement)) {
+              const [mx, my] = movement;
+              vx = clamp((mx / dragSensitivity) * 0.02, -1.2, 1.2);
+              vy = clamp((my / dragSensitivity) * 0.02, -1.2, 1.2);
+            }
+            if (Math.abs(vx) > 0.005 || Math.abs(vy) > 0.005) startInertia(vx, vy);
+            if (movedRef.current) lastDragEndAt.current = performance.now();
+            movedRef.current = false;
           }
-          if (Math.abs(vx) > 0.005 || Math.abs(vy) > 0.005) startInertia(vx, vy);
-          if (movedRef.current) lastDragEndAt.current = performance.now();
-          movedRef.current = false;
+          gestureDirectionRef.current = null;
         }
       },
     },

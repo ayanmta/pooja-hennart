@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, PanInfo } from "framer-motion";
 import { ChevronLeft, ChevronRight, Youtube, Instagram, Quote } from "lucide-react";
@@ -78,7 +78,7 @@ export function TestimonialsCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const x = useMotionValue(0);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
 
   if (!testimonials || testimonials.length === 0) {
     return null;
@@ -120,31 +120,36 @@ export function TestimonialsCarousel({
     setCurrentIndex(index);
   }, [currentIndex]);
 
-  // Handle swipe gestures
-  const handleDragStart = useCallback(() => {
-    setIsDragging(true);
+  // Handle mouse drag for desktop
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    startPosRef.current = { x: e.clientX, y: e.clientY };
   }, []);
 
-  const handleDragEnd = useCallback(
-    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-      setIsDragging(false);
-      const threshold = 50;
-      const offset = info.offset.x;
-      const velocity = info.velocity.x;
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!startPosRef.current) return;
+    const dx = e.clientX - startPosRef.current.x;
+    const dy = e.clientY - startPosRef.current.y;
+    // Only track horizontal movement
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+      setIsDragging(true);
+    }
+  }, []);
 
-      if (Math.abs(offset) > threshold || Math.abs(velocity) > 500) {
-        if (offset > 0 || velocity > 0) {
-          // Swipe right (previous)
-          prev();
-        } else {
-          // Swipe left (next)
-          next();
-        }
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
+    if (!startPosRef.current) return;
+    const dx = e.clientX - startPosRef.current.x;
+    const threshold = 50;
+    
+    if (Math.abs(dx) > threshold) {
+      if (dx > 0) {
+        prev();
+      } else {
+        next();
       }
-      x.set(0);
-    },
-    [next, prev, x]
-  );
+    }
+    setIsDragging(false);
+    startPosRef.current = null;
+  }, [next, prev]);
 
   const currentTestimonial = testimonials[currentIndex];
 
@@ -169,16 +174,50 @@ export function TestimonialsCarousel({
           {/* Card Container */}
           <div className="relative">
             <TiltedCard className="h-full">
-              <motion.div
-                drag="x"
-                dragConstraints={{ left: -100, right: 100 }}
-                dragElastic={0.3}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                style={{ x }}
-                className="relative cursor-grab active:cursor-grabbing"
+              <Card 
+                className="relative overflow-hidden border-2 bg-gradient-to-br from-card via-card to-muted/20 p-8 shadow-2xl transition-shadow duration-300 hover:shadow-3xl md:p-12 touch-pan-x select-none"
+                onTouchStart={(e) => {
+                  const touch = e.touches[0];
+                  startPosRef.current = { x: touch.clientX, y: touch.clientY };
+                }}
+                onTouchMove={(e) => {
+                  if (!startPosRef.current) return;
+                  const touch = e.touches[0];
+                  const dx = touch.clientX - startPosRef.current.x;
+                  const dy = touch.clientY - startPosRef.current.y;
+                  // Only track horizontal movement (prevent vertical scroll interference)
+                  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+                    setIsDragging(true);
+                    // Prevent vertical scroll when swiping horizontally
+                    if (Math.abs(dx) > 20) {
+                      e.preventDefault();
+                    }
+                  }
+                }}
+                onTouchEnd={(e) => {
+                  if (!startPosRef.current) return;
+                  const touch = e.changedTouches[0];
+                  const dx = touch.clientX - startPosRef.current.x;
+                  const threshold = 50;
+                  
+                  if (Math.abs(dx) > threshold) {
+                    if (dx > 0) {
+                      prev();
+                    } else {
+                      next();
+                    }
+                  }
+                  setIsDragging(false);
+                  startPosRef.current = null;
+                }}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={() => {
+                  setIsDragging(false);
+                  startPosRef.current = null;
+                }}
               >
-                <Card className="relative overflow-hidden border-2 bg-gradient-to-br from-card via-card to-muted/20 p-8 shadow-2xl transition-shadow duration-300 hover:shadow-3xl md:p-12 touch-pan-x touch-pan-y">
                   {/* Decorative Quote Icon */}
                   <div className="absolute right-8 top-8 opacity-5">
                     <Quote className="h-24 w-24 text-foreground" />
@@ -356,7 +395,6 @@ export function TestimonialsCarousel({
                     </motion.div>
                   )}
                 </Card>
-              </motion.div>
             </TiltedCard>
           </div>
         </motion.div>

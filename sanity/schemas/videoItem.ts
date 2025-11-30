@@ -16,11 +16,10 @@ export default defineType({
       name: "thumbnail",
       title: "Thumbnail Image",
       type: "image",
-      description: "Video thumbnail",
+      description: "Optional: Video thumbnail (will be auto-generated from video URL if not provided)",
       options: {
         hotspot: true,
       },
-      validation: (Rule) => Rule.required(),
       fields: [
         {
           name: "alt",

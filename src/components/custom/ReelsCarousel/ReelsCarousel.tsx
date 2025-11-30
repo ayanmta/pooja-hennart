@@ -6,6 +6,7 @@ import { Instagram, Youtube } from "lucide-react";
 import { type MediaItem } from "@/lib/types/media";
 import { cn } from "@/lib/utils/cn";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { getYouTubeThumbnail, getYouTubeVideoId } from "@/lib/utils/videoThumbnails";
 
 interface ReelsCarouselProps {
   reels: MediaItem[];
@@ -29,25 +30,26 @@ export function ReelsCarousel({
   const videoRefs = useRef<Map<string, HTMLIFrameElement>>(new Map());
 
   // Extract YouTube video ID from URL
-  const getYouTubeEmbedUrl = useCallback((url: string, autoplay = false) => {
+  const getYouTubeEmbedUrl = useCallback((url: string, autoplay = false, loop = false) => {
     if (!url) return '';
     
-    // Handle YouTube Shorts format
-    const shortsMatch = url.match(/(?:youtube\.com\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    if (shortsMatch && shortsMatch[1]) {
-      return `https://www.youtube.com/embed/${shortsMatch[1]}?autoplay=${autoplay ? 1 : 0}&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1`;
-    }
+    const videoId = getYouTubeVideoId(url);
+    if (!videoId) return url;
     
-    // Handle standard YouTube URL formats
-    const regExp = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|u\/\w\/|.*[&?]v=))([a-zA-Z0-9_-]{11})/;
-    const match = url.match(regExp);
-    const videoId = match && match[1] ? match[1] : null;
+    // Enhanced autoplay parameters for native app-like experience
+    const params = new URLSearchParams({
+      autoplay: autoplay ? '1' : '0',
+      mute: '0', // Start unmuted for better UX
+      controls: '1',
+      rel: '0', // Don't show related videos
+      modestbranding: '1',
+      playsinline: '1', // Important for mobile
+      enablejsapi: '1', // Enable JS API for better control
+      origin: typeof window !== 'undefined' ? window.location.origin : '',
+      ...(loop && { loop: '1', playlist: videoId }), // Loop support
+    });
     
-    if (videoId) {
-      return `https://www.youtube.com/embed/${videoId}?autoplay=${autoplay ? 1 : 0}&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1`;
-    }
-    
-    return url;
+    return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
   }, []);
 
   // Detect if it's a YouTube Short
@@ -55,12 +57,19 @@ export function ReelsCarousel({
     return url.includes('/shorts/') || url.includes('youtube.com/shorts/');
   }, []);
 
-  // Get Instagram embed URL (Instagram doesn't support direct embedding, but we can try oEmbed)
-  const getInstagramEmbedUrl = useCallback((url: string) => {
+  // Get Instagram embed URL with autoplay attempt
+  // Note: Instagram doesn't officially support autoplay in embeds, but we can try
+  const getInstagramEmbedUrl = useCallback((url: string, autoplay = false) => {
     // Extract post ID from Instagram URL
     const match = url.match(/instagram\.com\/(?:p|reel)\/([a-zA-Z0-9_-]+)/);
     if (match && match[1]) {
-      return `https://www.instagram.com/p/${match[1]}/embed`;
+      // Instagram embed with captions and autoplay attempt
+      const params = new URLSearchParams({
+        embed: 'true',
+        hidecaption: 'false',
+        ...(autoplay && { autoplay: 'true' }), // May not work, but we try
+      });
+      return `https://www.instagram.com/p/${match[1]}/embed/?${params.toString()}`;
     }
     return null;
   }, []);
@@ -142,27 +151,53 @@ export function ReelsCarousel({
       }, 0);
     }
 
-    // For YouTube videos, reload iframe with autoplay
+    // Autoplay when video comes into focus
     if (currentReel.platform === "youtube") {
       const iframe = videoRefs.current.get(videoId);
       if (iframe) {
-        const newSrc = getYouTubeEmbedUrl(currentReel.src, true);
-        if (iframe.src !== newSrc) {
+        // Reload with autoplay for native app-like experience
+        const newSrc = getYouTubeEmbedUrl(currentReel.src, true, false);
+        // Only update if URL changed to avoid unnecessary reloads
+        if (iframe.src.split('?')[0] !== newSrc.split('?')[0] || !iframe.src.includes('autoplay=1')) {
+          iframe.src = newSrc;
+        }
+      }
+    } else if (currentReel.platform === "instagram") {
+      // Instagram embeds don't support autoplay, but we can try to reload
+      const iframe = videoRefs.current.get(videoId);
+      if (iframe) {
+        const newSrc = getInstagramEmbedUrl(currentReel.src, true);
+        if (newSrc && iframe.src !== newSrc) {
           iframe.src = newSrc;
         }
       }
     }
-  }, [currentIndex, reels, playedVideos, getYouTubeEmbedUrl]);
+  }, [currentIndex, reels, playedVideos, getYouTubeEmbedUrl, getInstagramEmbedUrl]);
+
+  // Get thumbnail URL (auto-generate if not provided)
+  const getThumbnailUrl = useCallback((reel: MediaItem): string => {
+    if (reel.thumbnail) return reel.thumbnail;
+    
+    // Auto-generate thumbnail from video URL
+    if (reel.platform === "youtube") {
+      const thumbnail = getYouTubeThumbnail(reel.src);
+      return thumbnail || '';
+    }
+    
+    // Instagram thumbnails require oEmbed API, return empty for now
+    return '';
+  }, []);
 
   // Render individual reel card
   const renderReelCard = (reel: MediaItem, index: number, isDuplicate: boolean) => {
     const isYouTube = reel.platform === "youtube";
     const isInstagram = reel.platform === "instagram";
     const isActive = !isDuplicate && index === currentIndex;
-    const shouldAutoplay = isActive && isYouTube;
-    const youtubeEmbedUrl = isYouTube ? getYouTubeEmbedUrl(reel.src, shouldAutoplay) : '';
+    const shouldAutoplay = isActive; // Autoplay when active (both platforms)
+    const youtubeEmbedUrl = isYouTube ? getYouTubeEmbedUrl(reel.src, shouldAutoplay, false) : '';
     const isShort = isYouTube && isYouTubeShort(reel.src);
-    const instagramEmbedUrl = isInstagram ? getInstagramEmbedUrl(reel.src) : null;
+    const instagramEmbedUrl = isInstagram ? getInstagramEmbedUrl(reel.src, shouldAutoplay) : null;
+    const thumbnailUrl = getThumbnailUrl(reel);
 
     return (
       <div
@@ -200,23 +235,33 @@ export function ReelsCarousel({
           {/* Instagram Embed */}
           {isInstagram && instagramEmbedUrl ? (
             <iframe
+              ref={(el) => {
+                if (el) videoRefs.current.set(reel.id, el);
+              }}
               src={instagramEmbedUrl}
               title={reel.caption || "Instagram reel"}
               className="h-full w-full"
               scrolling="no"
-              allow="encrypted-media"
+              allow="encrypted-media; autoplay"
+              allowFullScreen
             />
           ) : isInstagram ? (
             // Fallback: Show thumbnail with link for Instagram
             <>
-              <Image
-                src={reel.thumbnail || reel.src}
-                alt={reel.caption || "Instagram reel"}
-                fill
-                className="object-cover"
-                sizes={`${cardWidth}px`}
-                priority={isActive}
-              />
+              {thumbnailUrl ? (
+                <Image
+                  src={thumbnailUrl}
+                  alt={reel.caption || "Instagram reel"}
+                  fill
+                  className="object-cover"
+                  sizes={`${cardWidth}px`}
+                  priority={isActive}
+                />
+              ) : (
+                <div className="h-full w-full bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 flex items-center justify-center">
+                  <Instagram className="h-16 w-16 text-white opacity-50" />
+                </div>
+              )}
               <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                 <button
                   onClick={() => window.open(reel.src, "_blank")}
@@ -227,15 +272,21 @@ export function ReelsCarousel({
               </div>
             </>
           ) : (
-            // Fallback: Show thumbnail
-            <Image
-              src={reel.thumbnail || reel.src}
-              alt={reel.caption || "Video thumbnail"}
-              fill
-              className="object-cover"
-              sizes={`${cardWidth}px`}
-              priority={isActive}
-            />
+            // Fallback: Show thumbnail (for other platforms or when video not loaded)
+            thumbnailUrl ? (
+              <Image
+                src={thumbnailUrl}
+                alt={reel.caption || "Video thumbnail"}
+                fill
+                className="object-cover"
+                sizes={`${cardWidth}px`}
+                priority={isActive}
+              />
+            ) : (
+              <div className="h-full w-full bg-black flex items-center justify-center">
+                <Youtube className="h-16 w-16 text-white opacity-50" />
+              </div>
+            )
           )}
 
           {/* Gradient Overlay (only for non-video or when video is not playing) */}
