@@ -3,10 +3,10 @@
 import React from "react";
 import { SiteHeader } from "@/components/custom/SiteHeader";
 import { SiteFooter } from "@/components/custom/SiteFooter";
-import { SectionHeader } from "@/components/custom/SectionHeader";
-import { ContactQuickActions } from "@/components/custom/ContactQuickActions";
+import { ContactSection } from "@/components/custom/ContactSection";
 import { BookingForm } from "@/components/custom/BookingForm";
 import { Card } from "@/components/ui/card";
+import { AnimatedSection } from "@/components/custom/AnimatedSection";
 
 interface ContactClientProps {
   contact: any;
@@ -37,36 +37,46 @@ export function ContactClient({
         logoText={logoUrl ? undefined : "Pooja HennArt & Makeover"}
       />
       <main className="min-h-screen">
-        <div className="container mx-auto px-4 py-8">
-          <SectionHeader
-            title="Book Your Look"
-            subtitle="Share your date & event details"
-            align="center"
-          />
-          <div className="mx-auto max-w-2xl space-y-8">
-            {/* Quick Actions */}
-            {contact && (
-              <ContactQuickActions
-                whatsappNumber={contact?.whatsappNumber || ""}
-                phoneNumber={contact?.phoneNumber}
-                instagramHandle={contact?.instagramHandle}
-                email={contact?.email}
-                showBookingForm={false}
-              />
-            )}
+        {/* Contact Section with Social Media */}
+        {contact && (
+          <AnimatedSection direction="up" delay={0.2}>
+            <ContactSection
+              whatsappNumber={contact?.whatsappNumber}
+              whatsappMessage={contact?.whatsappMessage}
+              phoneNumber={contact?.phoneNumber}
+              instagramHandle={contact?.instagramHandle}
+              facebookUrl={contact?.facebookUrl}
+              youtubeChannelUrl={contact?.youtubeChannelUrl}
+              email={contact?.email}
+              title={contact?.contactTitle || "Get in Touch"}
+              subtitle={contact?.contactSubtitle || "Connect with us on your preferred platform"}
+            />
+          </AnimatedSection>
+        )}
 
-            {/* Booking Form */}
-            <Card className="p-6">
-              <h3 className="mb-4 text-xl font-semibold">Booking Form</h3>
-              <BookingForm onSubmit={handleBookingSubmit} />
-            </Card>
-          </div>
-        </div>
+        {/* Booking Form */}
+        {contact?.showBookingForm && (
+          <AnimatedSection direction="up" delay={0.4}>
+            <div className="container mx-auto px-4 py-8">
+              <div className="mx-auto max-w-2xl">
+                <Card className="p-6 md:p-8">
+                  <h3 className="mb-4 text-2xl font-semibold">Book Your Look</h3>
+                  <p className="mb-6 text-muted-foreground">
+                    Share your date & event details
+                  </p>
+                  <BookingForm onSubmit={handleBookingSubmit} />
+                </Card>
+              </div>
+            </div>
+          </AnimatedSection>
+        )}
       </main>
       <SiteFooter
         instagramHandle={contact?.instagramHandle}
         email={contact?.email}
         phone={contact?.phoneNumber}
+        whatsappNumber={contact?.whatsappNumber}
+        youtubeChannelUrl={contact?.youtubeChannelUrl}
       />
     </>
   );

@@ -40,7 +40,7 @@ export function VideosClient({
         logoText={logoUrl ? undefined : "Pooja HennArt & Makeover"}
       />
       <main className="min-h-screen">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto py-8 md:py-10 lg:py-12">
           <SectionHeader
             title="Videos & Reels"
             subtitle="See the looks in motion"
@@ -58,6 +58,8 @@ export function VideosClient({
         instagramHandle={contact?.instagramHandle}
         email={contact?.email}
         phone={contact?.phoneNumber}
+        whatsappNumber={contact?.whatsappNumber}
+        youtubeChannelUrl={contact?.youtubeChannelUrl}
       />
 
       {/* Video Modal */}

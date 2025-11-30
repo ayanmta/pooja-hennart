@@ -13,6 +13,13 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "whatsappMessage",
+      title: "Default WhatsApp Message",
+      type: "text",
+      description: "Pre-filled message for WhatsApp (optional)",
+      rows: 3,
+    }),
+    defineField({
       name: "phoneNumber",
       title: "Phone Number",
       type: "string",
@@ -23,6 +30,18 @@ export default defineType({
       title: "Instagram Handle",
       type: "string",
       description: "Instagram username without @ (e.g., 'poojahennart')",
+    }),
+    defineField({
+      name: "facebookUrl",
+      title: "Facebook Page URL",
+      type: "url",
+      description: "Full URL to Facebook page (e.g., https://facebook.com/poojahennart)",
+    }),
+    defineField({
+      name: "youtubeChannelUrl",
+      title: "YouTube Channel URL",
+      type: "url",
+      description: "Full URL to YouTube channel (e.g., https://youtube.com/@poojahennart)",
     }),
     defineField({
       name: "email",
@@ -36,6 +55,19 @@ export default defineType({
       type: "boolean",
       description: "Display booking form in contact section",
       initialValue: false,
+    }),
+    defineField({
+      name: "contactTitle",
+      title: "Contact Section Title",
+      type: "string",
+      description: "Title for contact section (e.g., 'Get in Touch')",
+      initialValue: "Get in Touch",
+    }),
+    defineField({
+      name: "contactSubtitle",
+      title: "Contact Section Subtitle",
+      type: "string",
+      description: "Subtitle for contact section",
     }),
   ],
   preview: {

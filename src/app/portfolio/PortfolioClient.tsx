@@ -14,6 +14,7 @@ interface PortfolioClientProps {
   categories: any[];
   logoUrl?: string;
   logoAlt?: string;
+  contact?: any;
 }
 
 export function PortfolioClient({
@@ -21,6 +22,7 @@ export function PortfolioClient({
   categories,
   logoUrl,
   logoAlt,
+  contact,
 }: PortfolioClientProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -53,7 +55,7 @@ export function PortfolioClient({
         logoText={logoUrl ? undefined : "Pooja HennArt & Makeover"}
       />
       <main className="min-h-screen">
-        <div className="container mx-auto px-4 py-1">
+        <div className="container mx-auto py-4 md:py-6 lg:py-8">
           <SectionHeader
             title="Portfolio"
             subtitle="Browse all our work"
@@ -93,7 +95,13 @@ export function PortfolioClient({
           />
         </div>
       </main>
-      <SiteFooter />
+      <SiteFooter
+        instagramHandle={contact?.instagramHandle}
+        email={contact?.email}
+        phone={contact?.phoneNumber}
+        whatsappNumber={contact?.whatsappNumber}
+        youtubeChannelUrl={contact?.youtubeChannelUrl}
+      />
 
       {/* Media Lightbox */}
       <MediaLightbox

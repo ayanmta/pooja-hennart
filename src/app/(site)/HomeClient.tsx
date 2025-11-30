@@ -17,7 +17,6 @@ import { VideoModal } from "@/components/custom/VideoModal";
 import { AboutPoojaSection } from "@/components/custom/AboutPoojaSection";
 import { TestimonialsCarousel } from "@/components/custom/TestimonialsCarousel";
 import type { Testimonial } from "@/components/custom/TestimonialsCarousel/TestimonialsCarousel";
-import { ContactQuickActions } from "@/components/custom/ContactQuickActions";
 import { AnimatedSection } from "@/components/custom/AnimatedSection";
 import { Button } from "@/components/ui/button";
 import { type MediaItem } from "@/lib/types/media";
@@ -50,10 +49,15 @@ interface HomeClientProps {
   } | null;
   contact: {
     whatsappNumber?: string;
+    whatsappMessage?: string;
     phoneNumber?: string;
     instagramHandle?: string;
+    facebookUrl?: string;
+    youtubeChannelUrl?: string;
     email?: string;
     showBookingForm?: boolean;
+    contactTitle?: string;
+    contactSubtitle?: string;
   } | null;
   testimonials: SanityTestimonial[];
 }
@@ -117,16 +121,24 @@ export function HomeClient({
         logoImage={hero?.logoUrl}
         logoAlt={hero?.logoAlt || "Pooja HennArt & Makeover"}
         logoText={hero?.logoUrl ? undefined : "Pooja HennArt & Makeover"}
-        socialItems={
-          contact?.instagramHandle
+        socialItems={[
+          ...(contact?.instagramHandle
             ? [
                 {
                   label: "Instagram",
                   link: `https://instagram.com/${contact.instagramHandle.replace("@", "")}`,
                 },
               ]
-            : []
-        }
+            : []),
+          ...(contact?.youtubeChannelUrl
+            ? [
+                {
+                  label: "YouTube",
+                  link: contact.youtubeChannelUrl,
+                },
+              ]
+            : []),
+        ]}
       />
 
       <main className="min-h-screen">
@@ -152,17 +164,17 @@ export function HomeClient({
         {/* Featured Looks */}
         {featuredMedia.length > 0 && (
           <AnimatedSection direction="up" delay={0.2}>
-            <section className="py-12">
-              <div className="container mx-auto px-4">
+            <section className="py-12 md:py-14 lg:py-16">
+              <div className="container mx-auto">
                 <SectionHeader
                   title="Featured Looks"
                   subtitle="Handpicked bridal & mehendi work"
                   align="left"
                 />
                 <FeaturedLooks items={featuredMedia} onItemClick={handleMediaClick} />
-                <div className="mt-6 text-center">
+                <div className="mt-6 text-center md:mt-8 lg:mt-10">
                   <Link href="/portfolio">
-                    <Button variant="link" className="text-sm">
+                    <Button variant="link" className="text-sm md:text-base">
                       View full portfolio <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
@@ -176,7 +188,7 @@ export function HomeClient({
         <AnimatedSection direction="up" delay={0.3}>
           <AnimatedPortfolioSection className="py-1">
             <section className="relative overflow-visible">
-              <div className="container mx-auto px-4">
+              <div className="container mx-auto">
                 <SectionHeader
                   title="Portfolio"
                   subtitle="Explore by look"
@@ -231,8 +243,8 @@ export function HomeClient({
         {/* Videos */}
         {(reels.length > 0 || youtubeVideos.length > 0) && (
           <AnimatedSection direction="up" delay={0.4}>
-            <section className="py-12">
-              <div className="container mx-auto px-4">
+            <section className="py-12 md:py-14 lg:py-16">
+              <div className="container mx-auto">
                 <SectionHeader
                   title="Videos & Reels"
                   subtitle="See the looks in motion"
@@ -244,9 +256,9 @@ export function HomeClient({
                   onVideoClick={handleVideoClick}
                 />
                 {(reels.length > 4 || youtubeVideos.length > 4) && (
-                  <div className="mt-6 text-center">
+                  <div className="mt-6 text-center md:mt-8 lg:mt-10">
                     <Link href="/videos">
-                      <Button variant="link" className="text-sm">
+                      <Button variant="link" className="text-sm md:text-base">
                         View all videos <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
@@ -276,27 +288,6 @@ export function HomeClient({
           </AnimatedSection>
         )}
 
-        {/* Contact */}
-        {contact && (
-          <AnimatedSection direction="up" delay={0.7}>
-            <section className="py-12">
-              <div className="container mx-auto px-4">
-                <SectionHeader
-                  title="Book your look"
-                  subtitle="Share your date & event details"
-                  align="center"
-                />
-                <ContactQuickActions
-                  whatsappNumber={contact?.whatsappNumber || ""}
-                  phoneNumber={contact?.phoneNumber}
-                  instagramHandle={contact?.instagramHandle}
-                  email={contact?.email}
-                  showBookingForm={false}
-                />
-              </div>
-            </section>
-          </AnimatedSection>
-        )}
       </main>
 
       {/* Footer */}
@@ -304,6 +295,8 @@ export function HomeClient({
         instagramHandle={contact?.instagramHandle}
         email={contact?.email}
         phone={contact?.phoneNumber}
+        whatsappNumber={contact?.whatsappNumber}
+        youtubeChannelUrl={contact?.youtubeChannelUrl}
       />
 
       {/* Media Lightbox */}

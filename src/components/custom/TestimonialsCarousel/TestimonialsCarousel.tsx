@@ -119,8 +119,8 @@ export function TestimonialsCarousel({
   const currentTestimonial = testimonials[currentIndex];
 
   return (
-    <section aria-label="Testimonials" className="py-12 md:py-24">
-      <div className="container mx-auto px-4">
+    <section aria-label="Testimonials" className="py-12 md:py-14 lg:py-16">
+      <div className="container mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -129,11 +129,11 @@ export function TestimonialsCarousel({
           className="mx-auto max-w-4xl"
         >
           {/* Section Header */}
-          <div className="mb-12 text-center">
-            <h2 className="mb-3 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+          <div className="mb-12 text-center md:text-left">
+            <h2 className="mb-3 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl">
               Kind Words
             </h2>
-            <p className="text-muted-foreground">What clients are saying</p>
+            <p className="text-sm text-muted-foreground sm:text-base md:text-base lg:text-lg">What clients are saying</p>
           </div>
 
           {/* Card Container */}
@@ -168,10 +168,10 @@ export function TestimonialsCarousel({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2, duration: 0.4 }}
-                      className="relative mb-8 text-center"
+                      className="relative mb-8 text-center md:text-left"
                     >
-                      <Quote className="mb-4 h-8 w-8 text-muted-foreground/50" />
-                      <p className="text-lg leading-relaxed text-foreground sm:text-xl md:text-2xl lg:text-3xl">
+                      <Quote className="mb-4 h-8 w-8 text-muted-foreground/50 mx-auto md:mx-0" />
+                      <p className="text-base leading-relaxed text-foreground sm:text-lg md:text-lg lg:text-xl">
                         {currentTestimonial.quote}
                       </p>
                     </motion.blockquote>
@@ -181,7 +181,7 @@ export function TestimonialsCarousel({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3, duration: 0.4 }}
-                      className="flex flex-col items-center justify-center gap-4 sm:flex-row"
+                      className="flex flex-col items-center gap-4 sm:flex-row sm:items-center md:items-start"
                     >
                       {/* Profile Picture */}
                       {currentTestimonial.profilePic && (
@@ -201,9 +201,9 @@ export function TestimonialsCarousel({
                       )}
 
                       {/* Name and Event */}
-                      <div className="flex flex-col items-center gap-1 text-center sm:items-start">
+                      <div className="flex flex-col items-center gap-1 text-center sm:items-start md:text-left">
                         <div className="flex items-center gap-2">
-                          <cite className="not-italic font-semibold text-foreground">
+                          <cite className="not-italic font-semibold text-foreground text-base">
                             {currentTestimonial.name}
                           </cite>
                           {currentTestimonial.platform && (

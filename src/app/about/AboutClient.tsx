@@ -28,11 +28,11 @@ export function AboutClient({
         logoText={logoUrl ? undefined : "Pooja HennArt & Makeover"}
       />
       <main className="min-h-screen">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto py-8 md:py-10 lg:py-12">
           <SectionHeader
             title="About Pooja"
             subtitle="Learn more about the artist"
-            align="center"
+            align="left"
           />
           {about && (
             <AboutPoojaSection
@@ -48,6 +48,8 @@ export function AboutClient({
         instagramHandle={contact?.instagramHandle}
         email={contact?.email}
         phone={contact?.phoneNumber}
+        whatsappNumber={contact?.whatsappNumber}
+        youtubeChannelUrl={contact?.youtubeChannelUrl}
       />
     </>
   );

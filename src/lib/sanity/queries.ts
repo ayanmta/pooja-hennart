@@ -194,10 +194,15 @@ export async function getAbout() {
 export async function getContact() {
   const query = `*[_type == "contact"][0] {
     whatsappNumber,
+    whatsappMessage,
     phoneNumber,
     instagramHandle,
+    facebookUrl,
+    youtubeChannelUrl,
     email,
-    showBookingForm
+    showBookingForm,
+    contactTitle,
+    contactSubtitle
   }`;
 
   return await client.fetch(query);
@@ -227,6 +232,36 @@ export async function getTestimonials(limit?: number) {
   return await client.fetch(query);
 }
 
+// Editorial Projects Query
+export async function getEditorialProjects() {
+  const query = `*[_type == "editorial"] | order(order asc, date desc) {
+    _id,
+    title,
+    date,
+    description,
+    image {
+      asset-> {
+        _id,
+        url,
+        metadata {
+          dimensions {
+            width,
+            height,
+            aspectRatio
+          }
+        }
+      }
+    },
+    "imageUrl": image.asset->url,
+    "imageAlt": image.alt,
+    galleryLink,
+    galleryLinkText,
+    order
+  }`;
+
+  return await client.fetch(query);
+}
+
 // Export Sanity types for frontend usage
 export type SanityHero = Awaited<ReturnType<typeof getHero>>;
 export type SanityMediaItem = Awaited<ReturnType<typeof getMediaItems>>[number];
@@ -235,4 +270,5 @@ export type SanityCategory = Awaited<ReturnType<typeof getCategories>>[number];
 export type SanityAbout = Awaited<ReturnType<typeof getAbout>>;
 export type SanityContact = Awaited<ReturnType<typeof getContact>>;
 export type SanityTestimonial = Awaited<ReturnType<typeof getTestimonials>>[number];
+export type SanityEditorial = Awaited<ReturnType<typeof getEditorialProjects>>[number];
 

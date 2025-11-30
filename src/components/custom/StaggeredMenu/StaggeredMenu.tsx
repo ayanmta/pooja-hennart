@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/custom/Logo";
+import { ThemeToggle } from "@/components/custom/ThemeToggle";
 import { cn } from "@/lib/utils/cn";
 import "./StaggeredMenu.css";
 
@@ -716,6 +717,12 @@ export function StaggeredMenu({
               </li>
             )}
           </ul>
+          <div className="sm-panel-itemWrap">
+            <div className="sm-panel-item-button flex items-center justify-between">
+              <span className="sm-panel-itemLabel">Theme</span>
+              <ThemeToggle className="h-8 w-8" />
+            </div>
+          </div>
           {showLanguageToggle && (
             <div className="sm-panel-itemWrap">
               <Button

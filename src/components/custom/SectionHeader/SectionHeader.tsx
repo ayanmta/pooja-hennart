@@ -17,16 +17,18 @@ export function SectionHeader({
   return (
     <div
       className={cn(
-        "mb-6",
-        align === "center" && "text-center",
+        "mb-6 md:mb-7 lg:mb-8",
+        align === "center" 
+          ? "text-center" 
+          : "text-center md:text-left",
         className
       )}
     >
-      <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+      <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl">
         {title}
       </h2>
       {subtitle && (
-        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+        <p className="mt-2 text-sm text-muted-foreground sm:text-base md:text-base lg:text-lg lg:mt-3">
           {subtitle}
         </p>
       )}

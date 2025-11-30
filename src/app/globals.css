@@ -67,8 +67,9 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-serif-alt: var(--font-serif-alt);
 }
 
 @layer base {
@@ -82,12 +83,51 @@
   
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-family: var(--font-sans), system-ui, sans-serif;
   }
   
-  /* Handwritten/script font for hero subtitle */
-  .font-handwriting {
-    font-family: var(--font-dancing-script), 'Dancing Script', 'Brush Script MT', cursive;
+  /* Editorial serif for headings and titles */
+  .font-serif {
+    font-family: var(--font-serif), Georgia, serif;
+  }
+  
+  .font-serif-alt {
+    font-family: var(--font-serif-alt), Georgia, serif;
+  }
+  
+  /* Editorial headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif), Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  
+  /* Container improvements for desktop */
+  .container {
+    @apply mx-auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .container {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
   }
   
   /* Smooth scroll with reduced motion support */

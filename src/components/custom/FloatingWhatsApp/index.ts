@@ -1,0 +1,2 @@
+export { FloatingWhatsApp } from "./FloatingWhatsApp";
+
