@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { ReelsCarousel } from "@/components/custom/ReelsCarousel";
 import { type MediaItem } from "@/lib/types/media";
 import { cn } from "@/lib/utils/cn";
 
@@ -37,44 +38,11 @@ export function VideoGrid({
                 No reels available
               </p>
             ) : reelsLayout === "scroll" ? (
-              // Horizontal scroll layout (for home page)
-              <ScrollArea className="w-full whitespace-nowrap">
-                <div className="flex gap-4 pb-4">
-                  {reels.map((reel) => (
-                    <Card
-                      key={reel.id}
-                      className={cn(
-                        "group relative w-[200px] shrink-0 cursor-pointer overflow-hidden transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                        "sm:w-[240px]"
-                      )}
-                      onClick={() => onVideoClick?.(reel)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          onVideoClick?.(reel);
-                        }
-                      }}
-                      tabIndex={0}
-                      role="button"
-                      aria-label={reel.caption || "Instagram reel"}
-                    >
-                      <AspectRatio ratio={1}>
-                        <Image
-                          src={reel.thumbnail || reel.src}
-                          alt={reel.caption || "Reel thumbnail"}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 640px) 200px, 240px"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity group-hover:bg-black/40">
-                          <Play className="h-10 w-10 text-white" fill="white" />
-                        </div>
-                      </AspectRatio>
-                    </Card>
-                  ))}
-                </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+              // Reels carousel layout (Instagram-style swipeable cards)
+              <ReelsCarousel
+                reels={reels}
+                onReelClick={onVideoClick}
+              />
             ) : (
               // Grid layout (for videos page)
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">

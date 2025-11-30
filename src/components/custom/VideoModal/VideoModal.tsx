@@ -20,13 +20,37 @@ export function VideoModal({ video, open, onOpenChange }: VideoModalProps) {
   const isYouTube = video.platform === "youtube";
   const isInstagram = video.platform === "instagram";
 
-  // Extract YouTube video ID from URL
+  // Extract YouTube video ID from URL (handles regular videos and Shorts)
   const getYouTubeEmbedUrl = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    if (!url) return '';
+    
+    // Handle YouTube Shorts format: youtube.com/shorts/VIDEO_ID or youtu.be/VIDEO_ID (if it's a short)
+    const shortsMatch = url.match(/(?:youtube\.com\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (shortsMatch && shortsMatch[1]) {
+      return `https://www.youtube.com/embed/${shortsMatch[1]}`;
+    }
+    
+    // Handle standard YouTube URL formats
+    // Match: youtu.be/VIDEO_ID, youtube.com/watch?v=VIDEO_ID, youtube.com/embed/VIDEO_ID, etc.
+    const regExp = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|u\/\w\/|.*[&?]v=))([a-zA-Z0-9_-]{11})/;
     const match = url.match(regExp);
-    const videoId = match && match[2].length === 11 ? match[2] : null;
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    const videoId = match && match[1] ? match[1] : null;
+    
+    if (videoId) {
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    // Fallback: return original URL if we can't parse it
+    return url;
   };
+
+  // Detect if it's a YouTube Short (vertical video)
+  const isYouTubeShort = (url: string) => {
+    return url.includes('/shorts/') || url.includes('youtube.com/shorts/');
+  };
+
+  const youtubeEmbedUrl = isYouTube ? getYouTubeEmbedUrl(video.src) : '';
+  const isShort = isYouTube && isYouTubeShort(video.src);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,15 +70,17 @@ export function VideoModal({ video, open, onOpenChange }: VideoModalProps) {
           {/* Video Player */}
           <div className="relative">
             {isYouTube ? (
-              <AspectRatio ratio={16 / 9}>
-                <iframe
-                  src={getYouTubeEmbedUrl(video.src)}
-                  title={video.caption || "YouTube video"}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="h-full w-full rounded-lg"
-                />
-              </AspectRatio>
+              <div className={isShort ? "flex justify-center" : ""}>
+                <AspectRatio ratio={isShort ? 9 / 16 : 16 / 9}>
+                  <iframe
+                    src={youtubeEmbedUrl}
+                    title={video.caption || "YouTube video"}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className={`h-full w-full rounded-lg ${isShort ? "max-w-md mx-auto" : ""}`}
+                  />
+                </AspectRatio>
+              </div>
             ) : isInstagram ? (
               <div className="flex h-[80vh] items-center justify-center bg-muted">
                 <div className="text-center">
