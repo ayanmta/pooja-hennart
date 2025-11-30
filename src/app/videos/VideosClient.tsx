@@ -50,7 +50,7 @@ export function VideosClient({
             reels={reels}
             youtubeVideos={youtubeVideos}
             onVideoClick={handleVideoClick}
-            reelsLayout="grid"
+            reelsLayout="scroll"
           />
         </div>
       </main>
