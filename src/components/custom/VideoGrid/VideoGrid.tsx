@@ -38,7 +38,7 @@ export function VideoGrid({
                 No reels available
               </p>
             ) : reelsLayout === "scroll" ? (
-              // Reels carousel layout (Instagram-style swipeable cards)
+              // Reels carousel layout (Instagram-style swipeable cards with autoplay)
               <ReelsCarousel
                 reels={reels}
                 onReelClick={onVideoClick}
@@ -86,6 +86,13 @@ export function VideoGrid({
               <p className="text-center text-muted-foreground">
                 No YouTube videos available
               </p>
+            ) : reelsLayout === "scroll" ? (
+              // YouTube Shorts-style carousel with autoplay
+              <ReelsCarousel
+                reels={youtubeVideos}
+                onReelClick={onVideoClick}
+                includeYouTube={true}
+              />
             ) : (
               <div className="grid grid-cols-1 gap-4">
                 {youtubeVideos.map((video) => (
