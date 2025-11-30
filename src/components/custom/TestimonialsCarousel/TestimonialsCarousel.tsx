@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, PanInfo } from "framer-motion";
 import { ChevronLeft, ChevronRight, Youtube, Instagram, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils/cn";
 
 export interface Testimonial {
@@ -76,6 +77,8 @@ export function TestimonialsCarousel({
 }: TestimonialsCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const x = useMotionValue(0);
 
   if (!testimonials || testimonials.length === 0) {
     return null;
@@ -101,20 +104,47 @@ export function TestimonialsCarousel({
     }),
   };
 
-  const next = () => {
+  const next = useCallback(() => {
     setDirection(1);
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-  };
+  }, [testimonials.length]);
 
-  const prev = () => {
+  const prev = useCallback(() => {
     setDirection(-1);
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  };
+  }, [testimonials.length]);
 
-  const goToSlide = (index: number) => {
+  const goToSlide = useCallback((index: number) => {
+    if (index === currentIndex) return;
     setDirection(index > currentIndex ? 1 : -1);
     setCurrentIndex(index);
-  };
+  }, [currentIndex]);
+
+  // Handle swipe gestures
+  const handleDragStart = useCallback(() => {
+    setIsDragging(true);
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      setIsDragging(false);
+      const threshold = 50;
+      const offset = info.offset.x;
+      const velocity = info.velocity.x;
+
+      if (Math.abs(offset) > threshold || Math.abs(velocity) > 500) {
+        if (offset > 0 || velocity > 0) {
+          // Swipe right (previous)
+          prev();
+        } else {
+          // Swipe left (next)
+          next();
+        }
+      }
+      x.set(0);
+    },
+    [next, prev, x]
+  );
 
   const currentTestimonial = testimonials[currentIndex];
 
@@ -139,30 +169,39 @@ export function TestimonialsCarousel({
           {/* Card Container */}
           <div className="relative">
             <TiltedCard className="h-full">
-              <Card className="relative overflow-hidden border-2 bg-gradient-to-br from-card via-card to-muted/20 p-8 shadow-2xl transition-shadow duration-300 hover:shadow-3xl md:p-12">
-                {/* Decorative Quote Icon */}
-                <div className="absolute right-8 top-8 opacity-5">
-                  <Quote className="h-24 w-24 text-foreground" />
-                </div>
+              <motion.div
+                drag="x"
+                dragConstraints={{ left: -100, right: 100 }}
+                dragElastic={0.3}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                style={{ x }}
+                className="relative cursor-grab active:cursor-grabbing"
+              >
+                <Card className="relative overflow-hidden border-2 bg-gradient-to-br from-card via-card to-muted/20 p-8 shadow-2xl transition-shadow duration-300 hover:shadow-3xl md:p-12 touch-pan-x touch-pan-y">
+                  {/* Decorative Quote Icon */}
+                  <div className="absolute right-8 top-8 opacity-5">
+                    <Quote className="h-24 w-24 text-foreground" />
+                  </div>
 
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-muted/5" />
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-muted/5" />
 
-                <AnimatePresence mode="wait" custom={direction}>
-                  <motion.div
-                    key={currentIndex}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{
-                      x: { type: "spring", stiffness: 300, damping: 30 },
-                      opacity: { duration: 0.2 },
-                      scale: { duration: 0.2 },
-                    }}
-                    className="relative z-10"
-                  >
+                  <AnimatePresence mode="wait" custom={direction}>
+                    <motion.div
+                      key={currentIndex}
+                      custom={direction}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{
+                        x: { type: "spring", stiffness: 300, damping: 30 },
+                        opacity: { duration: 0.2 },
+                        scale: { duration: 0.2 },
+                      }}
+                      className="relative z-10"
+                    >
                     {/* Quote */}
                     <motion.blockquote
                       initial={{ opacity: 0, y: 10 }}
@@ -201,95 +240,123 @@ export function TestimonialsCarousel({
                       )}
 
                       {/* Name and Event */}
-                      <div className="flex flex-col items-center gap-1 text-center sm:items-start md:text-left">
-                        <div className="flex items-center gap-2">
+                      <div className="flex flex-col items-center gap-2 text-center sm:items-start md:text-left">
+                        <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                           <cite className="not-italic font-semibold text-foreground text-base">
                             {currentTestimonial.name}
                           </cite>
                           {currentTestimonial.platform && (
-                            <motion.span
-                              whileHover={{ scale: 1.2, rotate: 5 }}
-                              className="text-muted-foreground"
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "gap-1.5",
+                                currentTestimonial.platform === "youtube" && "border-red-500/50 text-red-600",
+                                currentTestimonial.platform === "instagram" && "border-pink-500/50 text-pink-600"
+                              )}
                             >
                               {currentTestimonial.platform === "youtube" ? (
-                                <Youtube className="h-5 w-5 text-red-500" />
+                                <>
+                                  <Youtube className="h-3.5 w-3.5" />
+                                  <span className="text-xs">YouTube</span>
+                                </>
                               ) : currentTestimonial.platform === "instagram" ? (
-                                <Instagram className="h-5 w-5 text-pink-500" />
+                                <>
+                                  <Instagram className="h-3.5 w-3.5" />
+                                  <span className="text-xs">Instagram</span>
+                                </>
                               ) : null}
-                            </motion.span>
+                            </Badge>
                           )}
                         </div>
                         {currentTestimonial.event && (
-                          <p className="text-sm font-medium text-muted-foreground">
+                          <Badge variant="secondary" className="text-xs font-normal">
                             {currentTestimonial.event}
-                          </p>
+                          </Badge>
                         )}
                       </div>
                     </motion.div>
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* Navigation Buttons */}
-                {testimonials.length > 1 && (
-                  <>
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-sm shadow-lg transition-all hover:bg-background hover:shadow-xl"
-                        onClick={prev}
-                        aria-label="Previous testimonial"
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                      </Button>
                     </motion.div>
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-sm shadow-lg transition-all hover:bg-background hover:shadow-xl"
-                        onClick={next}
-                        aria-label="Next testimonial"
-                      >
-                        <ChevronRight className="h-5 w-5" />
-                      </Button>
-                    </motion.div>
-                  </>
-                )}
+                  </AnimatePresence>
 
-                {/* Dot Indicators */}
-                {testimonials.length > 1 && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="mt-10 flex justify-center gap-2"
-                  >
-                    {testimonials.map((_, index) => (
-                      <motion.button
-                        key={index}
-                        type="button"
-                        onClick={() => goToSlide(index)}
-                        whileHover={{ scale: 1.2 }}
+                  {/* Navigation Buttons */}
+                  {testimonials.length > 1 && (
+                    <>
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        className={cn(
-                          "h-2 rounded-full transition-all duration-300",
-                          index === currentIndex
-                            ? "w-8 bg-foreground shadow-md"
-                            : "w-2 bg-muted-foreground/50 hover:bg-muted-foreground"
-                        )}
-                        aria-label={`Go to testimonial ${index + 1}`}
-                      />
-                    ))}
-                  </motion.div>
-                )}
-              </Card>
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 rounded-full bg-background/90 backdrop-blur-md shadow-lg transition-all hover:bg-background hover:shadow-xl md:left-4"
+                          onClick={prev}
+                          disabled={isDragging}
+                          aria-label="Previous testimonial"
+                        >
+                          <ChevronLeft className="h-5 w-5" />
+                        </Button>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 rounded-full bg-background/90 backdrop-blur-md shadow-lg transition-all hover:bg-background hover:shadow-xl md:right-4"
+                          onClick={next}
+                          disabled={isDragging}
+                          aria-label="Next testimonial"
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </Button>
+                      </motion.div>
+                    </>
+                  )}
+
+                  {/* Dot Indicators */}
+                  {testimonials.length > 1 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="mt-8 flex flex-wrap items-center justify-center gap-2 md:mt-10"
+                    >
+                      {testimonials.map((_, index) => (
+                        <motion.button
+                          key={index}
+                          type="button"
+                          onClick={() => goToSlide(index)}
+                          whileHover={{ scale: 1.2 }}
+                          whileTap={{ scale: 0.9 }}
+                          className={cn(
+                            "h-2 rounded-full transition-all duration-300",
+                            index === currentIndex
+                              ? "w-8 bg-primary shadow-md"
+                              : "w-2 bg-muted-foreground/50 hover:bg-muted-foreground"
+                          )}
+                          aria-label={`Go to testimonial ${index + 1}`}
+                          aria-current={index === currentIndex ? "true" : "false"}
+                        />
+                      ))}
+                    </motion.div>
+                  )}
+
+                  {/* Swipe Hint */}
+                  {testimonials.length > 1 && !isDragging && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10"
+                    >
+                      <Badge variant="outline" className="text-xs font-normal bg-background/80 backdrop-blur-sm">
+                        Swipe to navigate
+                      </Badge>
+                    </motion.div>
+                  )}
+                </Card>
+              </motion.div>
             </TiltedCard>
           </div>
         </motion.div>
