@@ -173,7 +173,7 @@ export function HeroSection({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
-        <h1 className="text-center text-9xl font-bold leading-[0.9] tracking-tight sm:text-[10rem] md:text-[12rem] lg:text-[14rem] xl:text-[16rem] 2xl:text-[18rem]">
+        <h1 className="text-center text-9xl leading-[0.9] tracking-tight sm:text-[10rem] md:text-[12rem] lg:text-[14rem] xl:text-[16rem] 2xl:text-[18rem]">
           <span className="text-transparent [text-stroke:4px_white] [-webkit-text-stroke:4px_white] drop-shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
             {title}
           </span>

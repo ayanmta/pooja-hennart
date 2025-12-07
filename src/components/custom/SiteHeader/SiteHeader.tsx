@@ -257,7 +257,7 @@ export function SiteHeader({
 
                 {socialItems.length > 0 && (
                   <div className="border-t border-border pt-6">
-                    <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                    <h3 className="mb-4 text-sm uppercase tracking-wider text-muted-foreground">
                       Social
                     </h3>
                     <div className="flex flex-col gap-2">

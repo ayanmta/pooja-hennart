@@ -165,7 +165,7 @@ export function TestimonialsCarousel({
         >
           {/* Section Header */}
           <div className="mb-12 text-center md:text-left">
-            <h2 className="mb-3 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl">
+            <h2 className="mb-3 text-2xl tracking-tight sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl">
               Kind Words
             </h2>
             <p className="text-sm text-muted-foreground sm:text-base md:text-base lg:text-lg">What clients are saying</p>

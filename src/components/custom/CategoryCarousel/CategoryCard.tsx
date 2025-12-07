@@ -82,7 +82,7 @@ export function CategoryCard({
           >
             <h3
               className={cn(
-                "text-white font-semibold text-lg mb-1",
+                "text-white text-lg mb-1",
                 "line-clamp-1",
                 "drop-shadow-sm"
               )}

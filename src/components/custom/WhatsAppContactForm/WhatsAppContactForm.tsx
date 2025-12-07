@@ -133,7 +133,7 @@ export function WhatsAppContactForm({
               <MessageCircle className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold leading-none">Send via WhatsApp</h3>
+              <h3 className="leading-none">Send via WhatsApp</h3>
               <p className="mt-1.5 text-sm text-muted-foreground">
                 Fill in your details or send a quick message
               </p>
@@ -172,7 +172,7 @@ export function WhatsAppContactForm({
               <MessageCircle className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold leading-none">Send via WhatsApp</h3>
+              <h3 className="leading-none">Send via WhatsApp</h3>
               <p className="mt-1.5 text-sm text-muted-foreground">
                 Fill in your details and we'll open WhatsApp for you
               </p>

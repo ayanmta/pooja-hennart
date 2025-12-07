@@ -95,11 +95,28 @@
     font-family: var(--font-serif-alt), Georgia, serif;
   }
   
-  /* Editorial headings */
+  /* Elegant and professional heading hierarchy using Playfair Display */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif), Georgia, serif;
-    font-weight: 600;
     letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  
+  /* Heading weight hierarchy - elegant and professional */
+  h1 {
+    font-weight: 700; /* Bold for main titles */
+  }
+  
+  h2 {
+    font-weight: 600; /* Semibold for section titles */
+  }
+  
+  h3 {
+    font-weight: 600; /* Semibold for subsections */
+  }
+  
+  h4, h5, h6 {
+    font-weight: 600; /* Semibold for smaller headings */
   }
   
   /* Container improvements for desktop */

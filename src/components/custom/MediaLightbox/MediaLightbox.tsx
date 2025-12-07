@@ -271,7 +271,7 @@ export function MediaLightbox({
               {/* Title */}
               {currentItem.title && (
                 <div>
-                  <h2 className="font-serif text-xl xl:text-2xl font-semibold leading-tight text-foreground">
+                  <h2 className="text-xl xl:text-2xl leading-tight text-foreground">
                     {currentItem.title}
                   </h2>
                 </div>

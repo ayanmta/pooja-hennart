@@ -25,7 +25,7 @@ export function SiteFooter({
         <div className="flex flex-col gap-6 md:flex-row md:justify-between md:items-center">
           {/* Brand */}
           <div>
-            <h3 className="text-lg font-bold">Pooja HennArt & Makeover</h3>
+            <h3 className="text-lg">Pooja HennArt & Makeover</h3>
             <p className="mt-2 text-sm text-muted-foreground">
               Professional Bridal Makeup & Mehendi Artist
             </p>

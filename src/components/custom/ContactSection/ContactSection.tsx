@@ -124,7 +124,7 @@ export function ContactSection({
         {(title || subtitle) && (
           <div className="mb-10 text-center md:text-left md:mb-12 lg:mb-14">
             {title && (
-              <h2 className="mb-2 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl">
+              <h2 className="mb-2 text-2xl tracking-tight sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl">
                 {title}
               </h2>
             )}

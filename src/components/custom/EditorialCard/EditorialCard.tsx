@@ -75,7 +75,7 @@ export function EditorialCard({
         </p>
 
         {/* Title with Underline */}
-        <h3 className="font-serif text-2xl md:text-3xl mb-4 relative inline-block pb-2">
+        <h3 className="text-2xl md:text-3xl mb-4 relative inline-block pb-2">
           {title}
           <span className="absolute bottom-0 left-0 right-0 h-px bg-foreground/20"></span>
         </h3>
