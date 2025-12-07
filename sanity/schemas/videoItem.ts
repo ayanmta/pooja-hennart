@@ -34,11 +34,13 @@ export default defineType({
       type: "string",
       options: {
         list: [
-          { title: "Instagram Reels", value: "instagram" },
           { title: "YouTube", value: "youtube" },
+          { title: "Instagram Reels (In Progress - Not Displayed)", value: "instagram" },
         ],
       },
       validation: (Rule) => Rule.required(),
+      description: "Note: Instagram Reels are currently in progress and will not be displayed on the site. Only YouTube videos are shown.",
+      initialValue: "youtube",
     }),
     defineField({
       name: "url",
@@ -82,7 +84,7 @@ export default defineType({
     prepare({ title, subtitle, media }) {
       return {
         title,
-        subtitle: subtitle === "instagram" ? "📱 Instagram Reel" : "▶️ YouTube",
+        subtitle: subtitle === "instagram" ? "📱 Instagram Reel (In Progress - Not Displayed)" : "▶️ YouTube",
         media,
       };
     },

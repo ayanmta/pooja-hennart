@@ -24,10 +24,18 @@ const thumbnailProjection = `
   thumbnail {
     asset-> {
       _id,
-      url
+      url,
+      metadata {
+        dimensions {
+          width,
+          height,
+          aspectRatio
+        }
+      }
     }
   },
-  "thumbnailUrl": thumbnail.asset->url
+  "thumbnailUrl": thumbnail.asset->url,
+  "hasThumbnail": defined(thumbnail.asset)
 `;
 
 // Hero Section Query
@@ -144,30 +152,34 @@ export async function getVideoItems(platform?: "instagram" | "youtube") {
 
   const items = await client.fetch(query);
   
+  // Filter out Instagram videos - only return YouTube videos for now
+  // Instagram support is in progress and will not be displayed
+  const youtubeItems = items.filter((item: any) => item.platform === "youtube");
+  
   // Transform to MediaItem type
-  return items.map((item: any): MediaItem => {
+  return youtubeItems.map((item: any): MediaItem => {
     const platform = item.platform || "youtube";
     const url = item.url || "";
     
-    // Auto-generate thumbnail if not provided
-    let thumbnail = item.thumbnailUrl || "";
+    // Get thumbnail URL from Sanity asset
+    // thumbnailUrl will be undefined if no thumbnail is uploaded
+    let thumbnail = item.thumbnailUrl || undefined;
+    
+    // Auto-generate YouTube thumbnail if not provided
+    // YouTube provides public thumbnail URLs: https://img.youtube.com/vi/{videoId}/maxresdefault.jpg
     if (!thumbnail && url) {
-      if (platform === "youtube") {
-        // Extract YouTube video ID and generate thumbnail URL
-        const videoIdMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/|.*[&?]v=))([a-zA-Z0-9_-]{11})/);
-        if (videoIdMatch && videoIdMatch[1]) {
-          thumbnail = `https://img.youtube.com/vi/${videoIdMatch[1]}/maxresdefault.jpg`;
-        }
+      const videoIdMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/|.*[&?]v=))([a-zA-Z0-9_-]{11})/);
+      if (videoIdMatch && videoIdMatch[1]) {
+        thumbnail = `https://img.youtube.com/vi/${videoIdMatch[1]}/maxresdefault.jpg`;
       }
-      // Instagram thumbnails require oEmbed API, handled in component
     }
     
     return {
       id: item._id,
       type: "video",
       src: url,
-      thumbnail: thumbnail,
-      platform: platform as "youtube" | "instagram",
+      thumbnail: thumbnail || undefined,
+      platform: "youtube" as const, // Only YouTube for now
       categories: item.categories?.map((cat: any) => cat.id) || [],
       title: item.title || undefined,
       caption: item.caption || undefined,

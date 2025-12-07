@@ -38,15 +38,17 @@ export default defineType({
       name: "platform",
       title: "Platform",
       type: "string",
-      description: "Source platform",
+      description: "Source platform for the testimonial",
       options: {
         list: [
           { title: "YouTube", value: "youtube" },
           { title: "Instagram", value: "instagram" },
+          { title: "WhatsApp", value: "whatsapp" },
           { title: "Manual", value: "manual" },
         ],
       },
       validation: (Rule) => Rule.required(),
+      initialValue: "manual",
     }),
     defineField({
       name: "platformId",

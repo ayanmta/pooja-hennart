@@ -54,7 +54,7 @@ export function SiteHeader({
   const menuItems = [
     { label: "Home", link: "/", ariaLabel: "Home" },
     { label: "Portfolio", link: "/portfolio", ariaLabel: "View portfolio" },
-    { label: "Videos", link: "/videos", ariaLabel: "View videos" },
+    { label: "Social Bits", link: "/social", ariaLabel: "View social bits" },
     { label: "About", link: "/about", ariaLabel: "About Pooja" },
     { label: "Contact", link: "/contact", ariaLabel: "Contact" },
   ];

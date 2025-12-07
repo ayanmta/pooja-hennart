@@ -11,8 +11,7 @@ import { FeaturedLooks } from "@/components/custom/FeaturedLooks";
 import { CategoryCarousel } from "@/components/custom/CategoryCarousel";
 import { AnimatedPortfolioSection } from "@/components/custom/AnimatedPortfolioSection";
 import { MediaLightbox } from "@/components/custom/MediaLightbox";
-import { VideoGrid } from "@/components/custom/VideoGrid";
-import { VideoModal } from "@/components/custom/VideoModal";
+import { SocialBitsSection } from "@/components/custom/SocialBitsSection";
 import { AboutPoojaSection } from "@/components/custom/AboutPoojaSection";
 import { TestimonialsCarousel } from "@/components/custom/TestimonialsCarousel";
 import type { Testimonial } from "@/components/custom/TestimonialsCarousel/TestimonialsCarousel";
@@ -79,8 +78,6 @@ export function HomeClient({
 }: HomeClientProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<MediaItem | null>(null);
 
   // Transform categories to CategoryCard entities for carousel
   const categoryCards: CategoryCard[] = useMemo(() => {
@@ -151,10 +148,6 @@ export function HomeClient({
     setLightboxOpen(true);
   };
 
-  const handleVideoClick = (item: MediaItem) => {
-    setSelectedVideo(item);
-    setVideoModalOpen(true);
-  };
 
   // Transform Sanity testimonials to component format
   const transformedTestimonials: Testimonial[] = testimonials.map((testimonial) => ({
@@ -163,7 +156,7 @@ export function HomeClient({
     name: testimonial.authorName,
     event: testimonial.event,
     profilePic: testimonial.authorProfilePicUrl || testimonial.authorProfilePicFromUrl,
-    platform: testimonial.platform as "youtube" | "instagram" | "manual",
+    platform: testimonial.platform as "youtube" | "instagram" | "whatsapp" | "manual",
   }));
 
   return (
@@ -265,26 +258,27 @@ export function HomeClient({
           </AnimatedPortfolioSection>
         </AnimatedSection>
 
-        {/* Videos */}
+        {/* Social Bits */}
         {(reels.length > 0 || youtubeVideos.length > 0) && (
           <AnimatedSection direction="up" delay={0.4}>
             <section className="py-12 md:py-14 lg:py-16">
               <div className="container mx-auto">
                 <SectionHeader
-                  title="Videos & Reels"
+                  title="Social Bits"
                   subtitle="See the looks in motion"
                   align="left"
                 />
-                <VideoGrid
-                  reels={reels.slice(0, 4)}
-                  youtubeVideos={youtubeVideos.slice(0, 4)}
-                  onVideoClick={handleVideoClick}
+                <SocialBitsSection
+                  reels={reels}
+                  youtubeVideos={youtubeVideos}
+                  maxItems={8}
+                  useCarousel={true}
                 />
-                {(reels.length > 4 || youtubeVideos.length > 4) && (
+                {(reels.length + youtubeVideos.length > 8) && (
                   <div className="mt-6 text-center md:mt-8 lg:mt-10">
-                    <Link href="/videos">
+                    <Link href="/social">
                       <Button variant="link" className="text-sm md:text-base">
-                        View all videos <ArrowRight className="ml-2 h-4 w-4" />
+                        View all <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                   </div>
@@ -332,14 +326,6 @@ export function HomeClient({
         onOpenChange={setLightboxOpen}
       />
 
-      {/* Video Modal */}
-      {selectedVideo && (
-        <VideoModal
-          video={selectedVideo}
-          open={videoModalOpen}
-          onOpenChange={setVideoModalOpen}
-        />
-      )}
     </>
   );
 }

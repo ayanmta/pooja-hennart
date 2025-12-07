@@ -27,9 +27,10 @@ export default async function Home() {
   // Get featured media
   const featuredMedia = await getMediaItems(true);
 
-  // Separate reels and YouTube videos
-  const reels = allVideos.filter((video: MediaItem) => video.platform === "instagram");
-  const youtubeVideos = allVideos.filter((video: MediaItem) => video.platform === "youtube");
+  // Only YouTube videos are shown for now
+  // Instagram Reels are in progress and filtered out in getVideoItems()
+  const reels: MediaItem[] = []; // Empty for now - Instagram support in progress
+  const youtubeVideos = allVideos; // All returned videos are YouTube
 
   return (
     <HomeClient
