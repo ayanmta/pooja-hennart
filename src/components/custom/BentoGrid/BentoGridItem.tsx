@@ -71,7 +71,7 @@ export function BentoGridItem({
       {(mediaItem.title || mediaItem.caption) && (
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex flex-col justify-end p-4 sm:p-6">
           {mediaItem.title && (
-            <h3 className="text-white font-serif text-lg sm:text-xl font-semibold mb-1 line-clamp-2">
+            <h3 className="text-white text-lg sm:text-xl mb-1 line-clamp-2">
               {mediaItem.title}
             </h3>
           )}

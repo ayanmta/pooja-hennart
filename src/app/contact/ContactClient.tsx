@@ -60,7 +60,7 @@ export function ContactClient({
             <div className="container mx-auto px-4 py-8">
               <div className="mx-auto max-w-2xl">
                 <Card className="p-6 md:p-8">
-                  <h3 className="mb-4 text-2xl font-semibold">Book Your Look</h3>
+                  <h3 className="mb-4 text-2xl">Book Your Look</h3>
                   <p className="mb-6 text-muted-foreground">
                     Share your date & event details
                   </p>

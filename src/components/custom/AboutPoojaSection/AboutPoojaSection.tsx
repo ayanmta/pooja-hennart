@@ -36,7 +36,7 @@ export function AboutPoojaSection({
 
           {/* Content */}
           <div className="space-y-5 md:space-y-6">
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl">
+            <h2 className="text-2xl tracking-tight sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl">
               {name}
             </h2>
             <p className="text-base leading-relaxed text-muted-foreground sm:text-lg md:text-base lg:text-lg">
@@ -44,7 +44,7 @@ export function AboutPoojaSection({
             </p>
             {expertise && expertise.length > 0 && (
               <div>
-                <h3 className="mb-3 text-base font-semibold md:text-base lg:mb-4 lg:text-lg">Expertise</h3>
+                <h3 className="mb-3 text-base md:text-base lg:mb-4 lg:text-lg">Expertise</h3>
                 <ul className="space-y-2 md:space-y-2.5">
                   {expertise.map((item, index) => (
                     <li key={index} className="flex items-center gap-2 text-sm text-muted-foreground md:text-base">
