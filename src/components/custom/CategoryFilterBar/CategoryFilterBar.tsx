@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 
@@ -24,6 +24,11 @@ export function CategoryFilterBar({
     defaultCategory
   );
 
+  // Sync internal state with prop changes (URL changes)
+  useEffect(() => {
+    setSelectedCategory(defaultCategory);
+  }, [defaultCategory]);
+
   const handleCategoryClick = (categoryId: string) => {
     const newCategory = selectedCategory === categoryId ? null : categoryId;
     setSelectedCategory(newCategory);
@@ -33,7 +38,7 @@ export function CategoryFilterBar({
   return (
     <nav
       aria-label="Filter categories"
-      className="flex flex-wrap gap-2 border-b border-border pb-4"
+      className="flex gap-2 border-b border-border pb-4 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap"
     >
       <Button
         variant={selectedCategory === null ? "default" : "outline"}
@@ -42,7 +47,7 @@ export function CategoryFilterBar({
           setSelectedCategory(null);
           onCategoryChange?.(null);
         }}
-        className="rounded-full"
+        className="rounded-full whitespace-nowrap flex-shrink-0"
         aria-pressed={selectedCategory === null}
       >
         All
@@ -53,7 +58,7 @@ export function CategoryFilterBar({
           variant={selectedCategory === category.id ? "default" : "outline"}
           size="sm"
           onClick={() => handleCategoryClick(category.id)}
-          className="rounded-full"
+          className="rounded-full whitespace-nowrap flex-shrink-0"
           aria-pressed={selectedCategory === category.id}
         >
           {category.label}

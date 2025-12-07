@@ -117,7 +117,10 @@ export async function getMediaItems(featuredOnly: boolean = false) {
     thumbnail: item.thumbnailUrl || item.imageUrl || "",
     platform: item.platform || "instagram",
     categories: item.categories?.map((cat: any) => cat.id) || [],
-    caption: item.caption || item.title || "",
+    title: item.title || undefined,
+    caption: item.caption || undefined,
+    isFeatured: item.isFeatured || false,
+    order: item.order ?? undefined,
   }));
 }
 
@@ -166,7 +169,10 @@ export async function getVideoItems(platform?: "instagram" | "youtube") {
       thumbnail: thumbnail,
       platform: platform as "youtube" | "instagram",
       categories: item.categories?.map((cat: any) => cat.id) || [],
-      caption: item.caption || item.title || "",
+      title: item.title || undefined,
+      caption: item.caption || undefined,
+      isFeatured: false, // Videos don't have featured status
+      order: item.order ?? undefined,
     };
   });
 }
@@ -176,10 +182,80 @@ export async function getCategories() {
   const query = `*[_type == "category"] | order(order asc) {
     id,
     label,
+    description,
     order
   }`;
 
   return await client.fetch(query);
+}
+
+// Get Media Items by Category
+export async function getMediaItemsByCategory(categoryId: string) {
+  const query = `*[_type == "mediaItem" && "${categoryId}" in categories[]->id] | order(order asc, _createdAt desc) {
+    _id,
+    title,
+    caption,
+    ${imageProjection},
+    ${thumbnailProjection},
+    categories[]-> {
+      id,
+      label
+    },
+    isFeatured,
+    platform,
+    order
+  }`;
+
+  const items = await client.fetch(query);
+  
+  // Transform to MediaItem type
+  return items.map((item: any): MediaItem => ({
+    id: item._id,
+    type: "image",
+    src: item.imageUrl || "",
+    thumbnail: item.thumbnailUrl || item.imageUrl || "",
+    platform: item.platform || "instagram",
+    categories: item.categories?.map((cat: any) => cat.id) || [],
+    title: item.title || undefined,
+    caption: item.caption || undefined,
+    isFeatured: item.isFeatured || false,
+    order: item.order ?? undefined,
+  }));
+}
+
+// Get Featured Media Items
+export async function getFeaturedMediaItems(limit?: number) {
+  const limitFilter = limit ? `[0...${limit}]` : "";
+  const query = `*[_type == "mediaItem" && isFeatured == true] | order(order asc, _createdAt desc) ${limitFilter} {
+    _id,
+    title,
+    caption,
+    ${imageProjection},
+    ${thumbnailProjection},
+    categories[]-> {
+      id,
+      label
+    },
+    isFeatured,
+    platform,
+    order
+  }`;
+
+  const items = await client.fetch(query);
+  
+  // Transform to MediaItem type
+  return items.map((item: any): MediaItem => ({
+    id: item._id,
+    type: "image",
+    src: item.imageUrl || "",
+    thumbnail: item.thumbnailUrl || item.imageUrl || "",
+    platform: item.platform || "instagram",
+    categories: item.categories?.map((cat: any) => cat.id) || [],
+    title: item.title || undefined,
+    caption: item.caption || undefined,
+    isFeatured: item.isFeatured || false,
+    order: item.order ?? undefined,
+  }));
 }
 
 // About Section Query

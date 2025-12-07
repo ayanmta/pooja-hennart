@@ -1,38 +1,45 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { SiteHeader } from "@/components/custom/SiteHeader";
 import { SiteFooter } from "@/components/custom/SiteFooter";
 import { SectionHeader } from "@/components/custom/SectionHeader";
 import { CategoryFilterBar, type Category } from "@/components/custom/CategoryFilterBar";
-import { DomeGallery } from "@/components/custom/DomeGallery";
+import { BentoGrid } from "@/components/custom/BentoGrid";
 import { MediaLightbox } from "@/components/custom/MediaLightbox";
 import { type MediaItem } from "@/lib/types/media";
 
 interface PortfolioClientProps {
-  allMedia: MediaItem[];
+  initialMedia: MediaItem[];
   categories: any[];
+  initialCategory?: string | null;
   logoUrl?: string;
   logoAlt?: string;
   contact?: any;
 }
 
 export function PortfolioClient({
-  allMedia,
+  initialMedia,
   categories,
+  initialCategory = null,
   logoUrl,
   logoAlt,
   contact,
 }: PortfolioClientProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // Filter media by category
+  // Get current category from URL (source of truth)
+  const currentCategory = searchParams.get("category") || initialCategory || null;
+
+  // Filter media by current category (client-side filtering for URL changes)
   const filteredMedia = useMemo(() => {
-    if (!selectedCategory) return allMedia;
-    return allMedia.filter((item) => item.categories.includes(selectedCategory));
-  }, [selectedCategory, allMedia]);
+    if (!currentCategory) return initialMedia;
+    return initialMedia.filter((item) => item.categories.includes(currentCategory));
+  }, [currentCategory, initialMedia]);
 
   // Transform categories to Category type
   const categoryOptions: Category[] = categories.map((cat) => ({
@@ -40,9 +47,19 @@ export function PortfolioClient({
     label: cat.label,
   }));
 
-  const handleMediaClick = (item: MediaItem) => {
-    const index = filteredMedia.findIndex((m) => m.id === item.id);
-    setLightboxIndex(index >= 0 ? index : 0);
+  // Handle category filter change - update URL
+  const handleCategoryChange = (categoryId: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (categoryId) {
+      params.set("category", categoryId);
+    } else {
+      params.delete("category");
+    }
+    router.push(`/portfolio?${params.toString()}`, { scroll: false });
+  };
+
+  const handleMediaClick = (item: MediaItem, index: number) => {
+    setLightboxIndex(index);
     setLightboxOpen(true);
   };
 
@@ -64,35 +81,29 @@ export function PortfolioClient({
           {categoryOptions.length > 0 && (
             <CategoryFilterBar
               categories={categoryOptions}
-              onCategoryChange={setSelectedCategory}
-              defaultCategory={null}
+              onCategoryChange={handleCategoryChange}
+              defaultCategory={currentCategory}
             />
           )}
         </div>
-        {/* Dome Gallery with minimal margins - negative side margins for focused images */}
-        <div 
-          className="mt-4 -mb-6 sm:-mb-8 md:-mb-10 -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 h-[90vh] min-h-[700px] relative overflow-hidden"
-        >
-          <DomeGallery
-            images={filteredMedia}
-            onImageClick={handleMediaClick}
-            fit={0.6}
-            fitBasis="auto"
-            minRadius={550}
-            maxRadius={1400}
-            padFactor={0.1}
-            overlayBlurColor="hsl(var(--background))"
-            maxVerticalRotationDeg={4}
-            dragSensitivity={25}
-            enlargeTransitionMs={400}
-            segments={35}
-            dragDampening={2}
-            openedImageWidth=""
-            openedImageHeight=""
-            imageBorderRadius="16px"
-            openedImageBorderRadius="24px"
-            grayscale={false}
-          />
+        {/* Bento Grid Portfolio */}
+        <div className="container mx-auto px-4 py-6 md:py-8">
+          {filteredMedia.length > 0 ? (
+            <BentoGrid
+              items={filteredMedia}
+              onItemClick={handleMediaClick}
+              initialBatchSize={20}
+              loadMoreBatchSize={20}
+            />
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                {currentCategory
+                  ? `No items found in "${categoryOptions.find((c) => c.id === currentCategory)?.label || currentCategory}" category`
+                  : "No portfolio items available"}
+              </p>
+            </div>
+          )}
         </div>
       </main>
       <SiteFooter
