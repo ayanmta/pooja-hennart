@@ -24,26 +24,30 @@ export function CategoryCarousel({
   className,
 }: CategoryCarouselProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [cardWidth, setCardWidth] = useState(280);
+  const [cardWidth, setCardWidth] = useState(320);
   const [isDragging, setIsDragging] = useState(false);
   const x = useMotionValue(0);
   const [constraints, setConstraints] = useState({ left: 0, right: 0 });
 
-  // Calculate card width for mobile (2.5 cards visible - 2 full + half)
+  // Calculate card width - make cards bigger
   useEffect(() => {
     const updateCardWidth = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
         const isMobile = window.innerWidth < 640;
+        const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
         
         if (isMobile) {
-          // Mobile: 2.5 cards with gaps (16px gap between cards, 16px padding on sides)
-          // Formula: (containerWidth - padding - gaps) / 2.5
-          const mobileCardWidth = (containerWidth - 16 * 3) / 2.5; // 2.5 cards + 3 gaps (between 2 full cards and half)
+          // Mobile: 1.5 cards visible (1 full + half) - bigger cards
+          const mobileCardWidth = (containerWidth - 16 * 2) / 1.5; // 1.5 cards + 2 gaps
           setCardWidth(mobileCardWidth);
+        } else if (isTablet) {
+          // Tablet: 2 cards visible - bigger cards
+          const tabletCardWidth = (containerWidth - 16 * 3) / 2; // 2 cards + 3 gaps
+          setCardWidth(tabletCardWidth);
         } else {
-          // Desktop: Fixed width for 4-5 cards with partial next
-          const desktopCardWidth = 320;
+          // Desktop: Bigger fixed width for 3-4 cards with partial next
+          const desktopCardWidth = 400;
           setCardWidth(desktopCardWidth);
         }
       }
