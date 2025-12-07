@@ -8,8 +8,7 @@ import { SiteFooter } from "@/components/custom/SiteFooter";
 import { SectionHeader } from "@/components/custom/SectionHeader";
 import { HeroSection } from "@/components/custom/HeroSection";
 import { FeaturedLooks } from "@/components/custom/FeaturedLooks";
-import { CategoryFilterBar, type Category } from "@/components/custom/CategoryFilterBar";
-import { DomeGallery } from "@/components/custom/DomeGallery";
+import { CategoryCarousel } from "@/components/custom/CategoryCarousel";
 import { AnimatedPortfolioSection } from "@/components/custom/AnimatedPortfolioSection";
 import { MediaLightbox } from "@/components/custom/MediaLightbox";
 import { VideoGrid } from "@/components/custom/VideoGrid";
@@ -21,6 +20,11 @@ import { AnimatedSection } from "@/components/custom/AnimatedSection";
 import { Button } from "@/components/ui/button";
 import { type MediaItem } from "@/lib/types/media";
 import { type SanityTestimonial } from "@/lib/sanity/queries";
+import type { CategoryCard, AllCard, CollageImage } from "@/lib/types/category";
+import {
+  selectTemplateImage,
+  selectAllCardImage,
+} from "@/lib/utils/template-image";
 
 interface HomeClientProps {
   hero: {
@@ -40,7 +44,7 @@ interface HomeClientProps {
   allMedia: MediaItem[];
   reels: MediaItem[];
   youtubeVideos: MediaItem[];
-  categories: Array<{ id: string; label: string }>;
+  categories: Array<{ id: string; label: string; description?: string; order?: number }>;
   about: {
     name?: string;
     bio?: string;
@@ -73,23 +77,72 @@ export function HomeClient({
   contact,
   testimonials,
 }: HomeClientProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<MediaItem | null>(null);
 
-  // Filter media by category
-  const filteredMedia = useMemo(() => {
-    if (!selectedCategory) return allMedia;
-    return allMedia.filter((item) => item.categories.includes(selectedCategory));
-  }, [selectedCategory, allMedia]);
+  // Transform categories to CategoryCard entities for carousel
+  const categoryCards: CategoryCard[] = useMemo(() => {
+    return categories.map((cat) => {
+      // Filter media items by category
+      const categoryMedia = allMedia.filter((item) =>
+        item.categories.includes(cat.id)
+      );
+      
+      // Select single template image (prioritize featured, fallback to recent)
+      const selectedMedia = selectTemplateImage(categoryMedia);
+      
+      // Transform to CollageImage format
+      const templateImage: CollageImage = selectedMedia
+        ? {
+            id: selectedMedia.id,
+            src: selectedMedia.thumbnail || selectedMedia.src,
+            alt: selectedMedia.caption || `Image from ${cat.label} category`,
+            thumbnail: selectedMedia.thumbnail,
+          }
+        : {
+            id: `placeholder-${cat.id}`,
+            src: "",
+            alt: `${cat.label} placeholder`,
+          };
+      
+      return {
+        categoryId: cat.id,
+        categoryLabel: cat.label,
+        description: cat.description || undefined,
+        templateImage,
+        href: `/portfolio?category=${cat.id}`,
+        order: cat.order || 0,
+      };
+    });
+  }, [categories, allMedia]);
 
-  // Transform categories to Category type
-  const categoryOptions: Category[] = categories.map((cat) => ({
-    id: cat.id,
-    label: cat.label,
-  }));
+  // Generate "All" card entity
+  const allCard: AllCard = useMemo(() => {
+    // Select single template image for "All" card (first featured, fallback to recent)
+    const selectedMedia = selectAllCardImage(allMedia);
+    
+    // Transform to CollageImage format
+    const templateImage: CollageImage = selectedMedia
+      ? {
+          id: selectedMedia.id,
+          src: selectedMedia.thumbnail || selectedMedia.src,
+          alt: selectedMedia.caption || "Featured image",
+          thumbnail: selectedMedia.thumbnail,
+        }
+      : {
+          id: "placeholder-all",
+          src: "",
+          alt: "All categories placeholder",
+        };
+    
+    return {
+      label: "All",
+      templateImage,
+      href: "/portfolio",
+    };
+  }, [allMedia]);
 
   // Handlers
   const handleMediaClick = (item: MediaItem) => {
@@ -194,38 +247,10 @@ export function HomeClient({
                   subtitle="Explore by look"
                   align="left"
                 />
-                {categoryOptions.length > 0 && (
-                  <CategoryFilterBar
-                    categories={categoryOptions}
-                    onCategoryChange={setSelectedCategory}
-                    defaultCategory={null}
-                  />
-                )}
               </div>
-              {/* Dome Gallery with minimal margins - negative side margins for focused images */}
-              <div 
-                className="mt-4 -mb-6 sm:-mb-8 md:-mb-10 -mx-4 sm:-mx-8 md:-mx-12 lg:-mx-16 xl:-mx-20 h-[75vh] min-h-[550px] md:h-[85vh] md:min-h-[650px] relative overflow-hidden"
-              >
-                <DomeGallery
-                  images={filteredMedia}
-                  onImageClick={handleMediaClick}
-                  fit={0.55}
-                  fitBasis="auto"
-                  minRadius={450}
-                  maxRadius={1200}
-                  padFactor={0.1}
-                  overlayBlurColor="hsl(var(--background))"
-                  maxVerticalRotationDeg={4}
-                  dragSensitivity={25}
-                  enlargeTransitionMs={400}
-                  segments={35}
-                  dragDampening={2}
-                  openedImageWidth=""
-                  openedImageHeight=""
-                  imageBorderRadius="16px"
-                  openedImageBorderRadius="24px"
-                  grayscale={false}
-                />
+              {/* Category Carousel */}
+              <div className="mt-8 mb-6">
+                <CategoryCarousel categories={categoryCards} />
               </div>
               {allMedia.length > 8 && (
                 <div className="container mx-auto px-4 text-center">

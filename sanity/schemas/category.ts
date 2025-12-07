@@ -33,6 +33,14 @@ export default defineType({
       description: "Lower numbers appear first",
       initialValue: 0,
     }),
+    defineField({
+      name: "description",
+      title: "Description",
+      type: "text",
+      description: "Short description for the category (shown on category cards)",
+      rows: 2,
+      validation: (Rule) => Rule.max(120).warning("Keep descriptions short for best display"),
+    }),
   ],
   preview: {
     select: {
