@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, PanInfo } from "framer-motion";
-import { ChevronLeft, ChevronRight, Youtube, Instagram, Quote } from "lucide-react";
+import { ChevronLeft, ChevronRight, Youtube, Instagram, MessageCircle, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ export interface Testimonial {
   name: string;
   event?: string;
   profilePic?: string;
-  platform?: "youtube" | "instagram" | "manual";
+  platform?: "youtube" | "instagram" | "whatsapp" | "manual";
 }
 
 interface TestimonialsCarouselProps {
@@ -294,7 +294,8 @@ export function TestimonialsCarousel({
                               className={cn(
                                 "gap-1.5",
                                 currentTestimonial.platform === "youtube" && "border-red-500/50 text-red-600",
-                                currentTestimonial.platform === "instagram" && "border-pink-500/50 text-pink-600"
+                                currentTestimonial.platform === "instagram" && "border-pink-500/50 text-pink-600",
+                                currentTestimonial.platform === "whatsapp" && "border-green-500/50 text-green-600"
                               )}
                             >
                               {currentTestimonial.platform === "youtube" ? (
@@ -306,6 +307,11 @@ export function TestimonialsCarousel({
                                 <>
                                   <Instagram className="h-3.5 w-3.5" />
                                   <span className="text-xs">Instagram</span>
+                                </>
+                              ) : currentTestimonial.platform === "whatsapp" ? (
+                                <>
+                                  <MessageCircle className="h-3.5 w-3.5" />
+                                  <span className="text-xs">WhatsApp</span>
                                 </>
                               ) : null}
                             </Badge>
