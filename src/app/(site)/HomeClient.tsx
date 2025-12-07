@@ -274,11 +274,11 @@ export function HomeClient({
                   maxItems={8}
                   useCarousel={true}
                 />
-                {(reels.length + youtubeVideos.length > 8) && (
+                {(reels.length + youtubeVideos.length > 0) && (
                   <div className="mt-6 text-center md:mt-8 lg:mt-10">
                     <Link href="/social">
-                      <Button variant="link" className="text-sm md:text-base">
-                        View all <ArrowRight className="ml-2 h-4 w-4" />
+                      <Button variant="outline" className="text-sm md:text-base">
+                        Show all <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                   </div>

@@ -36,18 +36,18 @@ export function SocialBitsCarousel({
         const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
         
         if (isMobile) {
-          // Mobile: 1.1 cards visible (1 full + tiny peek) - YouTube Shorts style
-          // Vertical cards are tall, so show almost full card
-          const mobileCardWidth = (containerWidth - 16 * 2) / 1.1; // 1.1 cards + 2 gaps
-          setCardWidth(Math.min(mobileCardWidth, 320)); // Cap at 320px for mobile
+          // Mobile: 1 card visible - Pinterest style, bigger portrait cards
+          // Vertical cards are tall, show full card for better visibility
+          const mobileCardWidth = containerWidth - 16 * 2; // Full width minus padding
+          setCardWidth(Math.min(mobileCardWidth, 360)); // Cap at 360px for mobile (bigger)
         } else if (isTablet) {
-          // Tablet: 1.3 cards visible - vertical format needs space
-          const tabletCardWidth = (containerWidth - 16 * 3) / 1.3; // 1.3 cards + 3 gaps
-          setCardWidth(Math.min(tabletCardWidth, 380)); // Cap at 380px for tablet
+          // Tablet: 1.2 cards visible - bigger portrait cards like Pinterest
+          const tabletCardWidth = (containerWidth - 16 * 3) / 1.2; // 1.2 cards + 3 gaps
+          setCardWidth(Math.min(tabletCardWidth, 450)); // Cap at 450px for tablet (bigger)
         } else {
-          // Desktop: YouTube Shorts style - larger vertical cards
-          // Show 2-2.5 cards with partial next visible
-          const desktopCardWidth = 400; // Larger cards for better visibility
+          // Desktop: Pinterest style - much larger vertical cards
+          // Show 1.5-2 cards with partial next visible for better visibility
+          const desktopCardWidth = 500; // Much larger cards like Pinterest
           setCardWidth(desktopCardWidth);
         }
       }
