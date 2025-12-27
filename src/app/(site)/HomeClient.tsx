@@ -16,6 +16,7 @@ import { AboutPoojaSection } from "@/components/custom/AboutPoojaSection";
 import { TestimonialsCarousel } from "@/components/custom/TestimonialsCarousel";
 import type { Testimonial } from "@/components/custom/TestimonialsCarousel/TestimonialsCarousel";
 import { AnimatedSection } from "@/components/custom/AnimatedSection";
+import { LocationMap } from "@/components/custom/LocationMap";
 import { Button } from "@/components/ui/button";
 import { type MediaItem } from "@/lib/types/media";
 import { type SanityTestimonial } from "@/lib/sanity/queries";
@@ -300,9 +301,26 @@ export function HomeClient({
           </AnimatedSection>
         )}
 
+        {/* Location Map */}
+        {(contact as any)?.location?.latitude && (contact as any)?.location?.longitude && (
+          <AnimatedSection direction="up" delay={0.6}>
+            <section className="w-full py-12 md:py-14 lg:py-16">
+              <div className="container mx-auto px-4">
+                <LocationMap
+                  poojaLocation={{
+                    latitude: (contact as any).location.latitude,
+                    longitude: (contact as any).location.longitude,
+                    address: (contact as any).location.address,
+                  }}
+                />
+              </div>
+            </section>
+          </AnimatedSection>
+        )}
+
         {/* Testimonials */}
         {transformedTestimonials.length > 0 && (
-          <AnimatedSection direction="up" delay={0.6}>
+          <AnimatedSection direction="up" delay={0.7}>
             <TestimonialsCarousel testimonials={transformedTestimonials} />
           </AnimatedSection>
         )}

@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/custom/SiteHeader";
 import { SiteFooter } from "@/components/custom/SiteFooter";
 import { ContactSection } from "@/components/custom/ContactSection";
 import { BookingForm } from "@/components/custom/BookingForm";
+import { LocationMap } from "@/components/custom/LocationMap";
 import { Card } from "@/components/ui/card";
 import { AnimatedSection } from "@/components/custom/AnimatedSection";
 
@@ -66,6 +67,23 @@ export function ContactClient({
                   </p>
                   <BookingForm onSubmit={handleBookingSubmit} />
                 </Card>
+              </div>
+            </div>
+          </AnimatedSection>
+        )}
+
+        {/* Location Map */}
+        {(contact as any)?.location?.latitude && (contact as any)?.location?.longitude && (contact as any)?.location?.showOnMap && (
+          <AnimatedSection direction="up" delay={0.6}>
+            <div className="w-full py-12 md:py-14 lg:py-16">
+              <div className="container mx-auto px-4">
+                <LocationMap
+                  poojaLocation={{
+                    latitude: (contact as any).location.latitude,
+                    longitude: (contact as any).location.longitude,
+                    address: (contact as any).location.address,
+                  }}
+                />
               </div>
             </div>
           </AnimatedSection>

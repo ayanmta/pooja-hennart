@@ -308,7 +308,13 @@ export async function getContact() {
     email,
     showBookingForm,
     contactTitle,
-    contactSubtitle
+    contactSubtitle,
+    location {
+      address,
+      latitude,
+      longitude,
+      showOnMap
+    }
   }`;
 
   return await client.fetch(query);

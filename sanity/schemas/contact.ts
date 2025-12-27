@@ -69,6 +69,41 @@ export default defineType({
       type: "string",
       description: "Subtitle for contact section",
     }),
+    defineField({
+      name: "location",
+      title: "Location",
+      type: "object",
+      description: "Pooja's location for map display",
+      fields: [
+        {
+          name: "address",
+          title: "Address",
+          type: "string",
+          description: "Full address for display (e.g., 'Mumbai, Maharashtra, India')",
+        },
+        {
+          name: "latitude",
+          title: "Latitude",
+          type: "number",
+          description: "Latitude coordinate (-90 to 90)",
+          validation: (Rule: any) => Rule.min(-90).max(90),
+        },
+        {
+          name: "longitude",
+          title: "Longitude",
+          type: "number",
+          description: "Longitude coordinate (-180 to 180)",
+          validation: (Rule: any) => Rule.min(-180).max(180),
+        },
+        {
+          name: "showOnMap",
+          title: "Show on Map",
+          type: "boolean",
+          description: "Display location on website map",
+          initialValue: true,
+        },
+      ],
+    }),
   ],
   preview: {
     select: {

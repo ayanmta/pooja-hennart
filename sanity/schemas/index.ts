@@ -6,6 +6,7 @@ import contact from "./contact";
 import category from "./category";
 import testimonial from "./testimonial";
 import editorial from "./editorial";
+import userLocationShare from "./userLocationShare";
 
 export const schemaTypes = [
   hero,
@@ -16,5 +17,6 @@ export const schemaTypes = [
   category,
   testimonial,
   editorial,
+  userLocationShare,
 ];
 
