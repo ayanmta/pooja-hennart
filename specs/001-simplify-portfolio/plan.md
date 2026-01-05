@@ -5,7 +5,7 @@
 
 ## Summary
 
-Replace the current DomeGallery (3D globe visualization) on the homepage "Explore by look" section with a horizontal Pinterest-style category carousel. Each category card displays a single template image selected from that category's media items in Sanity, with category name at the bottom. Cards navigate to the portfolio page when clicked. The carousel supports mobile (2.5 cards visible - 2 full + half) and desktop (4-5 cards with partial next card) with fast, responsive feedback. Design follows shadcn/ui principles with full dark/light theme support, maintaining the artistic, editorial aesthetic of the site.
+Replace the current DomeGallery (3D globe visualization) on the homepage "Explore by look" section with a horizontal Pinterest-style category carousel. Each category card displays a single template image selected from that category's media items in Sanity, with category name at the bottom. Cards navigate to the portfolio page when clicked. The carousel supports mobile (2.5 cards visible - 2 full + half) and desktop (4-5 cards with partial next card) with fast, responsive feedback. Design follows shadcn/ui principles with full dark and light theme support, maintaining the artistic, editorial aesthetic of the site.
 
 ## Technical Context
 
